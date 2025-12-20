@@ -1,0 +1,8 @@
+[package]
+name = "bevy_html_tailwind"
+version = "0.1.0"
+edition = "2024"
+license = "MPL-2.0"
+authors = ["Niklas Pfister <git@omikron.dev>"]
+
+[dependencies]
