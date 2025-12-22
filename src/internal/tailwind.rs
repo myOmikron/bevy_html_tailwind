@@ -4,6 +4,7 @@ use bevy::color::Color;
 use bevy::log::warn;
 use bevy::prelude::Bundle;
 use bevy::prelude::Visibility;
+use bevy::text::TextColor;
 use bevy::ui::*;
 use regex::Regex;
 
@@ -37,6 +38,7 @@ pub struct TailwindRegex {
     pub margin_b: Regex,
     pub margin_l: Regex,
     pub margin_r: Regex,
+    pub text_color: Regex,
 }
 
 pub static REGEX: LazyLock<TailwindRegex> = LazyLock::new(|| TailwindRegex {
@@ -75,6 +77,10 @@ pub static REGEX: LazyLock<TailwindRegex> = LazyLock::new(|| TailwindRegex {
     margin_b: Regex::new(r"mb-\[(\d+)px]$").unwrap(),
     margin_l: Regex::new(r"ml-\[(\d+)px]$").unwrap(),
     margin_r: Regex::new(r"mr-\[(\d+)px]$").unwrap(),
+    text_color: Regex::new(
+        r"text-\[#([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})?]$",
+    )
+    .unwrap(),
 });
 
 #[derive(Debug, Clone, PartialEq)]
@@ -100,6 +106,7 @@ pub struct Style {
     pub background_color: BackgroundColor,
     pub padding: UiRect,
     pub margin: UiRect,
+    pub text_color: TextColor,
 }
 
 impl Default for Style {
@@ -126,6 +133,7 @@ impl Default for Style {
             border: UiRect::default(),
             margin: UiRect::default(),
             padding: UiRect::default(),
+            text_color: TextColor::BLACK,
         }
     }
 }
@@ -582,6 +590,23 @@ impl Style {
                             top: px(px_val),
                             ..style.margin
                         };
+                    } else if REGEX.text_color.is_match(class) {
+                        let Some(captures) = REGEX.text_color.captures(class) else {
+                            continue;
+                        };
+                        let color_r =
+                            u8::from_str_radix(captures.get(1).unwrap().as_str(), 16).unwrap();
+                        let color_g =
+                            u8::from_str_radix(captures.get(2).unwrap().as_str(), 16).unwrap();
+                        let color_b =
+                            u8::from_str_radix(captures.get(3).unwrap().as_str(), 16).unwrap();
+                        let color_a = captures
+                            .get(4)
+                            .map(|x| u8::from_str_radix(x.as_str(), 16).unwrap())
+                            .unwrap_or(255);
+
+                        style.text_color =
+                            TextColor(Color::srgba_u8(color_r, color_g, color_b, color_a));
                     } else {
                         warn!("Unsupported style class: {class}");
                     }
@@ -618,6 +643,7 @@ impl Style {
             self.visibility,
             self.border_color,
             self.background_color,
+            self.text_color,
         )
     }
 }
@@ -625,6 +651,7 @@ impl Style {
 #[cfg(test)]
 mod tests {
     use bevy::prelude::px;
+    use bevy::ui::UiRect;
     use bevy::ui::percent;
 
     use crate::internal::tailwind::Style;
@@ -652,6 +679,18 @@ mod tests {
                     width: percent(100),
                     min_width: px(120),
                     max_width: px(200),
+                    ..Default::default()
+                },
+            ),
+            (
+                "ml-[2px] my-[20px]",
+                Style {
+                    margin: UiRect {
+                        left: px(2.0),
+                        bottom: px(20.0),
+                        top: px(20.0),
+                        ..Default::default()
+                    },
                     ..Default::default()
                 },
             ),

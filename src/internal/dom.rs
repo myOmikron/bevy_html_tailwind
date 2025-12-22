@@ -125,7 +125,7 @@ impl XText {
         commands.insert(self.style.to_node());
 
         if let Some(content) = &self.content {
-            commands.with_child(Text::new(content));
+            commands.insert(Text::new(content));
         }
 
         commands.with_children(|parent| {
