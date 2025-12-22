@@ -14,7 +14,7 @@ pub enum XNode {
 impl XNode {
     pub fn convert(node: roxmltree::Node, load_context: &mut LoadContext) -> Self {
         match node.node_type() {
-            roxmltree::NodeType::Element => match node.tag_name().name() {
+            roxmltree::NodeType::Element => match node.tag_name().name().to_lowercase().as_str() {
                 "div" => Self::Div(XDiv::convert(node, load_context)),
                 "p" | "span" => Self::Text(XText::convert(node, load_context)),
                 "img" => Self::Img(XImg::convert(node, load_context)),
