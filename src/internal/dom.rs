@@ -6,7 +6,7 @@ use crate::internal::tailwind::Style;
 #[derive(Debug, Clone)]
 pub enum XNode {
     Div(XDiv),
-    P(XP),
+    Text(XText),
     Img(XImg),
     Button(XButton),
 }
@@ -16,7 +16,7 @@ impl XNode {
         match node.node_type() {
             roxmltree::NodeType::Element => match node.tag_name().name() {
                 "div" => Self::Div(XDiv::convert(node, load_context)),
-                "p" => Self::P(XP::convert(node, load_context)),
+                "p" | "span" => Self::Text(XText::convert(node, load_context)),
                 "img" => Self::Img(XImg::convert(node, load_context)),
                 "button" => Self::Button(XButton::convert(node, load_context)),
                 _ => panic!("Unsupported tag: {}", node.tag_name().name()),
@@ -28,7 +28,7 @@ impl XNode {
     pub(crate) fn apply_to_entity(&self, commands: &mut EntityCommands) {
         match self {
             XNode::Div(x) => x.apply_to_entity(commands),
-            XNode::P(x) => x.apply_to_entity(commands),
+            XNode::Text(x) => x.apply_to_entity(commands),
             XNode::Img(x) => x.apply_to_entity(commands),
             XNode::Button(x) => x.apply_to_entity(commands),
         }
@@ -87,13 +87,13 @@ impl XDiv {
 }
 
 #[derive(Debug, Clone)]
-pub struct XP {
+pub struct XText {
     pub style: Style,
     pub content: Option<String>,
     pub children: Vec<XNode>,
 }
 
-impl XP {
+impl XText {
     pub fn convert(node: roxmltree::Node, load_context: &mut LoadContext) -> Self {
         let mut classes = String::new();
         let content = node
