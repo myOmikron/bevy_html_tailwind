@@ -367,6 +367,9 @@ impl Style {
                     }
                 }
 
+                "text-white" => style.text_color = TextColor::WHITE,
+                "text-black" => style.text_color = TextColor::BLACK,
+
                 _ => {
                     if REGEX.width.is_match(class) {
                         let Some(captures) = REGEX.width.captures(class) else {
