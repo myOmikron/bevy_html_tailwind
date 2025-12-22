@@ -21,6 +21,22 @@ pub struct TailwindRegex {
     pub border_r: Regex,
     pub border_t: Regex,
     pub border_b: Regex,
+    pub border_color: Regex,
+    pub background_color: Regex,
+    pub padding: Regex,
+    pub padding_x: Regex,
+    pub padding_y: Regex,
+    pub padding_l: Regex,
+    pub padding_r: Regex,
+    pub padding_t: Regex,
+    pub padding_b: Regex,
+    pub margin: Regex,
+    pub margin_x: Regex,
+    pub margin_y: Regex,
+    pub margin_t: Regex,
+    pub margin_b: Regex,
+    pub margin_l: Regex,
+    pub margin_r: Regex,
 }
 
 pub static REGEX: LazyLock<TailwindRegex> = LazyLock::new(|| TailwindRegex {
@@ -37,6 +53,28 @@ pub static REGEX: LazyLock<TailwindRegex> = LazyLock::new(|| TailwindRegex {
     border_r: Regex::new(r"^border-r-(\d+)$").unwrap(),
     border_t: Regex::new(r"^border-t-(\d+)$").unwrap(),
     border_b: Regex::new(r"^border-b-(\d+)$").unwrap(),
+    border_color: Regex::new(
+        r"^border-\[#([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})?]$",
+    )
+    .unwrap(),
+    background_color: Regex::new(
+        r"^bg-\[#([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})?]$",
+    )
+    .unwrap(),
+    padding: Regex::new(r"^p-\[(\d+)px]$").unwrap(),
+    padding_x: Regex::new(r"px-\[(\d+)px]$").unwrap(),
+    padding_y: Regex::new(r"py-\[(\d+)px]$").unwrap(),
+    padding_t: Regex::new(r"pt-\[(\d+)px]$").unwrap(),
+    padding_b: Regex::new(r"pb-\[(\d+)px]$").unwrap(),
+    padding_l: Regex::new(r"pl-\[(\d+)px]$").unwrap(),
+    padding_r: Regex::new(r"pr-\[(\d+)px]$").unwrap(),
+    margin: Regex::new(r"^m-\[(\d+)px]$").unwrap(),
+    margin_x: Regex::new(r"mx-\[(\d+)px]$").unwrap(),
+    margin_y: Regex::new(r"my-\[(\d+)px]$").unwrap(),
+    margin_t: Regex::new(r"mt-\[(\d+)px]$").unwrap(),
+    margin_b: Regex::new(r"mb-\[(\d+)px]$").unwrap(),
+    margin_l: Regex::new(r"ml-\[(\d+)px]$").unwrap(),
+    margin_r: Regex::new(r"mr-\[(\d+)px]$").unwrap(),
 });
 
 #[derive(Debug, Clone, PartialEq)]
@@ -59,6 +97,9 @@ pub struct Style {
     pub max_height: Val,
     pub border_color: BorderColor,
     pub border: UiRect,
+    pub background_color: BackgroundColor,
+    pub padding: UiRect,
+    pub margin: UiRect,
 }
 
 impl Default for Style {
@@ -81,7 +122,10 @@ impl Default for Style {
             min_height: Default::default(),
             max_height: Default::default(),
             border_color: BorderColor::DEFAULT,
+            background_color: BackgroundColor::DEFAULT,
             border: UiRect::default(),
+            margin: UiRect::default(),
+            padding: UiRect::default(),
         }
     }
 }
@@ -278,6 +322,9 @@ impl Style {
                     }
                 }
 
+                "p-px" => style.padding = UiRect::all(px(1.0)),
+                "m-px" => style.margin = UiRect::all(px(1.0)),
+
                 _ => {
                     if REGEX.width.is_match(class) {
                         let Some(captures) = REGEX.width.captures(class) else {
@@ -377,6 +424,164 @@ impl Style {
                             right: px(px_val),
                             ..style.border
                         };
+                    } else if REGEX.border_color.is_match(class) {
+                        let Some(captures) = REGEX.border_color.captures(class) else {
+                            continue;
+                        };
+                        let color_r =
+                            u8::from_str_radix(captures.get(1).unwrap().as_str(), 16).unwrap();
+                        let color_g =
+                            u8::from_str_radix(captures.get(2).unwrap().as_str(), 16).unwrap();
+                        let color_b =
+                            u8::from_str_radix(captures.get(3).unwrap().as_str(), 16).unwrap();
+                        let color_a = captures
+                            .get(4)
+                            .map(|x| u8::from_str_radix(x.as_str(), 16).unwrap())
+                            .unwrap_or(255);
+
+                        style.border_color =
+                            BorderColor::all(Color::srgba_u8(color_r, color_g, color_b, color_a));
+                    } else if REGEX.background_color.is_match(class) {
+                        let Some(captures) = REGEX.background_color.captures(class) else {
+                            continue;
+                        };
+                        let color_r =
+                            u8::from_str_radix(captures.get(1).unwrap().as_str(), 16).unwrap();
+                        let color_g =
+                            u8::from_str_radix(captures.get(2).unwrap().as_str(), 16).unwrap();
+                        let color_b =
+                            u8::from_str_radix(captures.get(3).unwrap().as_str(), 16).unwrap();
+                        let color_a = captures
+                            .get(4)
+                            .map(|x| u8::from_str_radix(x.as_str(), 16).unwrap())
+                            .unwrap_or(255);
+
+                        style.background_color =
+                            BackgroundColor(Color::srgba_u8(color_r, color_g, color_b, color_a));
+                    } else if REGEX.padding.is_match(class) {
+                        let Some(captures) = REGEX.padding.captures(class) else {
+                            continue;
+                        };
+                        let px_val = captures.get(1).unwrap().as_str().parse::<u64>().unwrap();
+                        style.padding = UiRect::all(px(px_val));
+                    } else if REGEX.padding_x.is_match(class) {
+                        let Some(captures) = REGEX.padding_x.captures(class) else {
+                            continue;
+                        };
+                        let px_val = captures.get(1).unwrap().as_str().parse::<u64>().unwrap();
+                        style.padding = UiRect {
+                            left: px(px_val),
+                            right: px(px_val),
+                            ..style.padding
+                        };
+                    } else if REGEX.padding_y.is_match(class) {
+                        let Some(captures) = REGEX.padding_y.captures(class) else {
+                            continue;
+                        };
+                        let px_val = captures.get(1).unwrap().as_str().parse::<u64>().unwrap();
+                        style.padding = UiRect {
+                            top: px(px_val),
+                            bottom: px(px_val),
+                            ..style.padding
+                        };
+                    } else if REGEX.padding_l.is_match(class) {
+                        let Some(captures) = REGEX.padding_l.captures(class) else {
+                            continue;
+                        };
+                        let px_val = captures.get(1).unwrap().as_str().parse::<u64>().unwrap();
+                        style.padding = UiRect {
+                            left: px(px_val),
+                            ..style.padding
+                        };
+                    } else if REGEX.padding_r.is_match(class) {
+                        let Some(captures) = REGEX.padding_r.captures(class) else {
+                            continue;
+                        };
+                        let px_val = captures.get(1).unwrap().as_str().parse::<u64>().unwrap();
+                        style.padding = UiRect {
+                            right: px(px_val),
+                            ..style.padding
+                        };
+                    } else if REGEX.padding_b.is_match(class) {
+                        let Some(captures) = REGEX.padding_b.captures(class) else {
+                            continue;
+                        };
+                        let px_val = captures.get(1).unwrap().as_str().parse::<u64>().unwrap();
+                        style.padding = UiRect {
+                            bottom: px(px_val),
+                            ..style.padding
+                        };
+                    } else if REGEX.padding_t.is_match(class) {
+                        let Some(captures) = REGEX.padding_t.captures(class) else {
+                            continue;
+                        };
+                        let px_val = captures.get(1).unwrap().as_str().parse::<u64>().unwrap();
+                        style.padding = UiRect {
+                            top: px(px_val),
+                            ..style.padding
+                        };
+                    } else if REGEX.margin.is_match(class) {
+                        let Some(captures) = REGEX.margin.captures(class) else {
+                            continue;
+                        };
+                        let px_val = captures.get(1).unwrap().as_str().parse::<u64>().unwrap();
+                        style.margin = UiRect::all(px(px_val));
+                    } else if REGEX.margin_x.is_match(class) {
+                        let Some(captures) = REGEX.margin_x.captures(class) else {
+                            continue;
+                        };
+                        let px_val = captures.get(1).unwrap().as_str().parse::<u64>().unwrap();
+                        style.margin = UiRect {
+                            left: px(px_val),
+                            right: px(px_val),
+                            ..style.margin
+                        };
+                    } else if REGEX.margin_y.is_match(class) {
+                        let Some(captures) = REGEX.margin_y.captures(class) else {
+                            continue;
+                        };
+                        let px_val = captures.get(1).unwrap().as_str().parse::<u64>().unwrap();
+                        style.margin = UiRect {
+                            top: px(px_val),
+                            bottom: px(px_val),
+                            ..style.margin
+                        };
+                    } else if REGEX.margin_l.is_match(class) {
+                        let Some(captures) = REGEX.margin_l.captures(class) else {
+                            continue;
+                        };
+                        let px_val = captures.get(1).unwrap().as_str().parse::<u64>().unwrap();
+                        style.margin = UiRect {
+                            left: px(px_val),
+                            ..style.margin
+                        };
+                    } else if REGEX.margin_r.is_match(class) {
+                        let Some(captures) = REGEX.margin_r.captures(class) else {
+                            continue;
+                        };
+                        let px_val = captures.get(1).unwrap().as_str().parse::<u64>().unwrap();
+                        style.margin = UiRect {
+                            right: px(px_val),
+                            ..style.margin
+                        };
+                    } else if REGEX.margin_b.is_match(class) {
+                        let Some(captures) = REGEX.margin_b.captures(class) else {
+                            continue;
+                        };
+                        let px_val = captures.get(1).unwrap().as_str().parse::<u64>().unwrap();
+                        style.margin = UiRect {
+                            bottom: px(px_val),
+                            ..style.margin
+                        };
+                    } else if REGEX.margin_t.is_match(class) {
+                        let Some(captures) = REGEX.margin_t.captures(class) else {
+                            continue;
+                        };
+                        let px_val = captures.get(1).unwrap().as_str().parse::<u64>().unwrap();
+                        style.margin = UiRect {
+                            top: px(px_val),
+                            ..style.margin
+                        };
                     } else {
                         warn!("Unsupported style class: {class}");
                     }
@@ -406,10 +611,13 @@ impl Style {
                 min_height: self.min_height,
                 max_height: self.max_height,
                 border: self.border,
+                padding: self.padding,
+                margin: self.margin,
                 ..Default::default()
             },
             self.visibility,
             self.border_color,
+            self.background_color,
         )
     }
 }
