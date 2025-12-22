@@ -23,5 +23,5 @@ default-features = false
 features = ["bevy_asset", "bevy_ui"]
 
 [dev-dependencies]
-bevy = { version = "~0.17" }
+bevy = { version = "~0.17", features = ["file_watcher"] }
 bevy-inspector-egui = { version = "~0.35" }

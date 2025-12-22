@@ -30,6 +30,22 @@ pub fn sync_system(
     ui: Query<(Entity, &HtmlUiHandle), With<HtmlUiSpawned>>,
 ) {
     for event in events.read() {
-        if let AssetEvent::Modified { id } = event {}
+        if let AssetEvent::Modified { id } = event {
+            for (entity, handle) in ui.iter() {
+                if handle.handle.id() == *id {
+                    let Some(asset) = assets.get(*id) else {
+                        continue;
+                    };
+
+                    if let Ok(mut entity_cmd) = commands.get_entity(entity) {
+                        entity_cmd.despawn_children();
+
+                        asset.dom.apply_to_entity(&mut entity_cmd);
+
+                        info!("UI hot-reloaded for entity {:?}", entity);
+                    }
+                }
+            }
+        }
     }
 }

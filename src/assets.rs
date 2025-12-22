@@ -25,7 +25,7 @@ impl AssetLoader for HtmlUiAssetLoader {
         &self,
         reader: &mut dyn Reader,
         _settings: &Self::Settings,
-        _load_context: &mut LoadContext<'_>,
+        load_context: &mut LoadContext<'_>,
     ) -> Result<Self::Asset, Self::Error> {
         let mut doc_raw = String::new();
         reader.read_to_string(&mut doc_raw).await?;
@@ -34,13 +34,17 @@ impl AssetLoader for HtmlUiAssetLoader {
 
         document.root().children().next().unwrap();
 
-        Ok(HtmlUi {
-            dom: XNode::convert(document.root().children().next().unwrap()),
-        })
+        let root = HtmlUi {
+            dom: XNode::convert(document.root().children().next().unwrap(), load_context),
+        };
+
+        debug!("Root node: {root:#?}");
+
+        Ok(root)
     }
 
     fn extensions(&self) -> &[&str] {
-        &["html"]
+        &["html", "xml"]
     }
 }
 
