@@ -74,7 +74,7 @@ impl XDiv {
     fn apply_to_entity(&self, commands: &mut EntityCommands) {
         commands.insert(self.style.to_node());
         if let Some(content) = &self.content {
-            commands.insert(Text::new(content));
+            commands.with_child(Text::new(content));
         }
 
         commands.with_children(|parent| {
@@ -125,7 +125,7 @@ impl XP {
         commands.insert(self.style.to_node());
 
         if let Some(content) = &self.content {
-            commands.insert(Text::new(content));
+            commands.with_child(Text::new(content));
         }
 
         commands.with_children(|parent| {
@@ -228,7 +228,7 @@ impl XButton {
         commands.insert((Button, self.style.to_node()));
 
         if let Some(content) = &self.content {
-            commands.insert(Text::new(content));
+            commands.with_child(Text::new(content));
         }
 
         commands.with_children(|parent| {

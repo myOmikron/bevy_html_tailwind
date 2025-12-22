@@ -1,9 +1,45 @@
+use std::sync::LazyLock;
+
+use bevy::color::Color;
 use bevy::log::warn;
 use bevy::prelude::Bundle;
 use bevy::prelude::Visibility;
 use bevy::ui::*;
+use regex::Regex;
 
-#[derive(Debug, Clone)]
+pub struct TailwindRegex {
+    pub width: Regex,
+    pub min_width: Regex,
+    pub max_width: Regex,
+    pub height: Regex,
+    pub min_height: Regex,
+    pub max_height: Regex,
+    pub border: Regex,
+    pub border_x: Regex,
+    pub border_y: Regex,
+    pub border_l: Regex,
+    pub border_r: Regex,
+    pub border_t: Regex,
+    pub border_b: Regex,
+}
+
+pub static REGEX: LazyLock<TailwindRegex> = LazyLock::new(|| TailwindRegex {
+    width: Regex::new(r"^w-\[(\d+)px]$").unwrap(),
+    min_width: Regex::new(r"^min-w-\[(\d+)px]$").unwrap(),
+    max_width: Regex::new(r"^max-w-\[(\d+)px]$").unwrap(),
+    height: Regex::new(r"^h-\[(\d+)px]$").unwrap(),
+    min_height: Regex::new(r"^min-h-\[(\d+)px]$").unwrap(),
+    max_height: Regex::new(r"^max-h-\[(\d+)px]$").unwrap(),
+    border: Regex::new(r"^border-(\d+)$").unwrap(),
+    border_x: Regex::new(r"^border-x-(\d+)$").unwrap(),
+    border_y: Regex::new(r"^border-y-(\d+)$").unwrap(),
+    border_l: Regex::new(r"^border-l-(\d+)$").unwrap(),
+    border_r: Regex::new(r"^border-r-(\d+)$").unwrap(),
+    border_t: Regex::new(r"^border-t-(\d+)$").unwrap(),
+    border_b: Regex::new(r"^border-b-(\d+)$").unwrap(),
+});
+
+#[derive(Debug, Clone, PartialEq)]
 pub struct Style {
     pub visibility: Visibility,
     pub position: PositionType,
@@ -16,7 +52,38 @@ pub struct Style {
     pub align_items: AlignItems,
     pub align_self: AlignSelf,
     pub width: Val,
+    pub min_width: Val,
+    pub max_width: Val,
     pub height: Val,
+    pub min_height: Val,
+    pub max_height: Val,
+    pub border_color: BorderColor,
+    pub border: UiRect,
+}
+
+impl Default for Style {
+    fn default() -> Self {
+        Self {
+            visibility: Default::default(),
+            position: Default::default(),
+            display: Display::Block,
+            flex_direction: Default::default(),
+            justify_content: Default::default(),
+            justify_items: Default::default(),
+            justify_self: Default::default(),
+            align_content: Default::default(),
+            align_items: Default::default(),
+            align_self: Default::default(),
+            width: Default::default(),
+            min_width: Default::default(),
+            max_width: Default::default(),
+            height: Default::default(),
+            min_height: Default::default(),
+            max_height: Default::default(),
+            border_color: BorderColor::DEFAULT,
+            border: UiRect::default(),
+        }
+    }
 }
 
 impl Style {
@@ -27,176 +94,297 @@ impl Style {
             .filter(|c| !c.is_empty())
             .collect::<Vec<_>>();
 
-        let mut visibility = Visibility::default();
-        let mut position = PositionType::default();
-        let mut display = Display::Block;
-        let mut flex_direction = FlexDirection::default();
-        let mut width = auto();
-        let mut height = auto();
-        let mut justify_content = JustifyContent::default();
-        let mut justify_items = JustifyItems::default();
-        let mut justify_self = JustifySelf::default();
-        let mut align_content = AlignContent::default();
-        let mut align_items = AlignItems::default();
-        let mut align_self = AlignSelf::default();
+        let mut style = Style::default();
 
         for class in classes {
             match class {
-                "visible" => visibility = Visibility::Visible,
-                "invisible" => visibility = Visibility::Hidden,
+                "visible" => style.visibility = Visibility::Visible,
+                "invisible" => style.visibility = Visibility::Hidden,
 
-                "relative" => position = PositionType::Relative,
-                "absolute" => position = PositionType::Absolute,
+                "relative" => style.position = PositionType::Relative,
+                "absolute" => style.position = PositionType::Absolute,
 
-                "block" => display = Display::Block,
-                "grid" => display = Display::Grid,
-                "flex" => display = Display::Flex,
+                "block" => style.display = Display::Block,
+                "grid" => style.display = Display::Grid,
+                "flex" => style.display = Display::Flex,
+                "hidden" => style.display = Display::None,
 
-                "flex-col" => flex_direction = FlexDirection::Column,
-                "flex-row" => flex_direction = FlexDirection::Row,
-                "flex-row-reverse" => flex_direction = FlexDirection::RowReverse,
-                "flex-col-reverse" => flex_direction = FlexDirection::ColumnReverse,
+                "flex-col" => style.flex_direction = FlexDirection::Column,
+                "flex-row" => style.flex_direction = FlexDirection::Row,
+                "flex-row-reverse" => style.flex_direction = FlexDirection::RowReverse,
+                "flex-col-reverse" => style.flex_direction = FlexDirection::ColumnReverse,
 
-                "justify-start" => justify_content = JustifyContent::FlexStart,
-                "justify-center" => justify_content = JustifyContent::Center,
-                "justify-end" => justify_content = JustifyContent::FlexEnd,
-                "justify-between" => justify_content = JustifyContent::SpaceBetween,
-                "justify-around" => justify_content = JustifyContent::SpaceAround,
-                "justify-evenly" => justify_content = JustifyContent::SpaceEvenly,
-                "justify-stretch" => justify_content = JustifyContent::Stretch,
-                "justify-normal" => justify_content = JustifyContent::Default,
+                "justify-start" => style.justify_content = JustifyContent::FlexStart,
+                "justify-center" => style.justify_content = JustifyContent::Center,
+                "justify-end" => style.justify_content = JustifyContent::FlexEnd,
+                "justify-between" => style.justify_content = JustifyContent::SpaceBetween,
+                "justify-around" => style.justify_content = JustifyContent::SpaceAround,
+                "justify-evenly" => style.justify_content = JustifyContent::SpaceEvenly,
+                "justify-stretch" => style.justify_content = JustifyContent::Stretch,
+                "justify-normal" => style.justify_content = JustifyContent::Default,
 
-                "justify-items-start" => justify_items = JustifyItems::Start,
-                "justify-items-end" => justify_items = JustifyItems::End,
-                "justify-items-center" => justify_items = JustifyItems::Center,
-                "justify-items-stretch" => justify_items = JustifyItems::Stretch,
-                "justify-items-normal" => justify_items = JustifyItems::Default,
+                "justify-items-start" => style.justify_items = JustifyItems::Start,
+                "justify-items-end" => style.justify_items = JustifyItems::End,
+                "justify-items-center" => style.justify_items = JustifyItems::Center,
+                "justify-items-stretch" => style.justify_items = JustifyItems::Stretch,
+                "justify-items-normal" => style.justify_items = JustifyItems::Default,
 
-                "justify-self-auto" => justify_self = JustifySelf::Auto,
-                "justify-self-start" => justify_self = JustifySelf::Start,
-                "justify-self-end" => justify_self = JustifySelf::End,
-                "justify-self-center" => justify_self = JustifySelf::Center,
-                "justify-self-stretch" => justify_self = JustifySelf::Stretch,
+                "justify-self-auto" => style.justify_self = JustifySelf::Auto,
+                "justify-self-start" => style.justify_self = JustifySelf::Start,
+                "justify-self-end" => style.justify_self = JustifySelf::End,
+                "justify-self-center" => style.justify_self = JustifySelf::Center,
+                "justify-self-stretch" => style.justify_self = JustifySelf::Stretch,
 
-                "content-normal" => align_content = AlignContent::Default,
-                "content-center" => align_content = AlignContent::Center,
-                "content-start" => align_content = AlignContent::FlexStart,
-                "content-end" => align_content = AlignContent::FlexEnd,
-                "content-between" => align_content = AlignContent::SpaceBetween,
-                "content-around" => align_content = AlignContent::SpaceAround,
-                "content-evenly" => align_content = AlignContent::SpaceEvenly,
-                "content-stretch" => align_content = AlignContent::Stretch,
+                "content-normal" => style.align_content = AlignContent::Default,
+                "content-center" => style.align_content = AlignContent::Center,
+                "content-start" => style.align_content = AlignContent::FlexStart,
+                "content-end" => style.align_content = AlignContent::FlexEnd,
+                "content-between" => style.align_content = AlignContent::SpaceBetween,
+                "content-around" => style.align_content = AlignContent::SpaceAround,
+                "content-evenly" => style.align_content = AlignContent::SpaceEvenly,
+                "content-stretch" => style.align_content = AlignContent::Stretch,
 
-                "items-start" => align_items = AlignItems::FlexStart,
-                "items-end" => align_items = AlignItems::FlexEnd,
-                "items-center" => align_items = AlignItems::Center,
-                "items-stretch" => align_items = AlignItems::Stretch,
-                "items-baseline" => align_items = AlignItems::Baseline,
+                "items-start" => style.align_items = AlignItems::FlexStart,
+                "items-end" => style.align_items = AlignItems::FlexEnd,
+                "items-center" => style.align_items = AlignItems::Center,
+                "items-stretch" => style.align_items = AlignItems::Stretch,
+                "items-baseline" => style.align_items = AlignItems::Baseline,
 
-                "self-auto" => align_self = AlignSelf::Auto,
-                "self-start" => align_self = AlignSelf::FlexStart,
-                "self-end" => align_self = AlignSelf::FlexEnd,
-                "self-center" => align_self = AlignSelf::Center,
-                "self-stretch" => align_self = AlignSelf::Stretch,
-                "self-baseline" => align_self = AlignSelf::Baseline,
+                "self-auto" => style.align_self = AlignSelf::Auto,
+                "self-start" => style.align_self = AlignSelf::FlexStart,
+                "self-end" => style.align_self = AlignSelf::FlexEnd,
+                "self-center" => style.align_self = AlignSelf::Center,
+                "self-stretch" => style.align_self = AlignSelf::Stretch,
+                "self-baseline" => style.align_self = AlignSelf::Baseline,
 
                 "place-content-center" => {
-                    align_content = AlignContent::Center;
-                    justify_content = JustifyContent::Center;
+                    style.align_content = AlignContent::Center;
+                    style.justify_content = JustifyContent::Center;
                 }
                 "place-content-start" => {
-                    align_content = AlignContent::FlexStart;
-                    justify_content = JustifyContent::FlexStart;
+                    style.align_content = AlignContent::FlexStart;
+                    style.justify_content = JustifyContent::FlexStart;
                 }
                 "place-content-end" => {
-                    align_content = AlignContent::FlexEnd;
-                    justify_content = JustifyContent::FlexEnd;
+                    style.align_content = AlignContent::FlexEnd;
+                    style.justify_content = JustifyContent::FlexEnd;
                 }
                 "place-content-between" => {
-                    align_content = AlignContent::SpaceBetween;
-                    justify_content = JustifyContent::SpaceBetween;
+                    style.align_content = AlignContent::SpaceBetween;
+                    style.justify_content = JustifyContent::SpaceBetween;
                 }
                 "place-content-around" => {
-                    align_content = AlignContent::SpaceAround;
-                    justify_content = JustifyContent::SpaceAround;
+                    style.align_content = AlignContent::SpaceAround;
+                    style.justify_content = JustifyContent::SpaceAround;
                 }
                 "place-content-evenly" => {
-                    align_content = AlignContent::SpaceEvenly;
-                    justify_content = JustifyContent::SpaceEvenly;
+                    style.align_content = AlignContent::SpaceEvenly;
+                    style.justify_content = JustifyContent::SpaceEvenly;
                 }
                 "place-content-stretch" => {
-                    align_content = AlignContent::Stretch;
-                    justify_content = JustifyContent::Stretch;
+                    style.align_content = AlignContent::Stretch;
+                    style.justify_content = JustifyContent::Stretch;
                 }
 
                 "place-items-start" => {
-                    align_items = AlignItems::FlexStart;
-                    justify_items = JustifyItems::Start;
+                    style.align_items = AlignItems::FlexStart;
+                    style.justify_items = JustifyItems::Start;
                 }
                 "place-items-end" => {
-                    align_items = AlignItems::FlexEnd;
-                    justify_items = JustifyItems::End;
+                    style.align_items = AlignItems::FlexEnd;
+                    style.justify_items = JustifyItems::End;
                 }
                 "place-items-center" => {
-                    align_items = AlignItems::Center;
-                    justify_items = JustifyItems::Center;
+                    style.align_items = AlignItems::Center;
+                    style.justify_items = JustifyItems::Center;
                 }
                 "place-items-stretch" => {
-                    align_items = AlignItems::Stretch;
-                    justify_items = JustifyItems::Stretch;
+                    style.align_items = AlignItems::Stretch;
+                    style.justify_items = JustifyItems::Stretch;
                 }
                 "place-items-baseline" => {
-                    align_items = AlignItems::Baseline;
-                    justify_items = JustifyItems::Baseline;
+                    style.align_items = AlignItems::Baseline;
+                    style.justify_items = JustifyItems::Baseline;
                 }
 
                 "place-self-auto" => {
-                    align_self = AlignSelf::Auto;
-                    justify_self = JustifySelf::Auto;
+                    style.align_self = AlignSelf::Auto;
+                    style.justify_self = JustifySelf::Auto;
                 }
                 "place-self-start" => {
-                    align_self = AlignSelf::FlexStart;
-                    justify_self = JustifySelf::Start;
+                    style.align_self = AlignSelf::FlexStart;
+                    style.justify_self = JustifySelf::Start;
                 }
                 "place-self-end" => {
-                    align_self = AlignSelf::FlexEnd;
-                    justify_self = JustifySelf::End;
+                    style.align_self = AlignSelf::FlexEnd;
+                    style.justify_self = JustifySelf::End;
                 }
                 "place-self-center" => {
-                    align_self = AlignSelf::Center;
-                    justify_self = JustifySelf::Center;
+                    style.align_self = AlignSelf::Center;
+                    style.justify_self = JustifySelf::Center;
                 }
                 "place-self-stretch" => {
-                    align_self = AlignSelf::Stretch;
-                    justify_self = JustifySelf::Stretch;
+                    style.align_self = AlignSelf::Stretch;
+                    style.justify_self = JustifySelf::Stretch;
                 }
 
-                "w-full" => width = percent(100.0),
-                "h-full" => height = percent(100.0),
+                "w-full" => style.width = percent(100.0),
+                "h-full" => style.height = percent(100.0),
                 "size-full" => {
-                    width = percent(100);
-                    height = percent(100.0);
+                    style.width = percent(100);
+                    style.height = percent(100.0);
                 }
+
+                "border-black" => style.border_color = BorderColor::all(Color::BLACK),
+                "border-white" => style.border_color = BorderColor::all(Color::WHITE),
+
+                "border" => style.border = UiRect::all(px(1)),
+                "border-x" => {
+                    style.border = UiRect {
+                        left: px(1.0),
+                        right: px(1.0),
+                        ..style.border
+                    }
+                }
+                "border-y" => {
+                    style.border = UiRect {
+                        top: px(1.0),
+                        bottom: px(1.0),
+                        ..style.border
+                    }
+                }
+                "border-l" => {
+                    style.border = UiRect {
+                        left: px(1.0),
+                        ..style.border
+                    }
+                }
+                "border-r" => {
+                    style.border = UiRect {
+                        right: px(1.0),
+                        ..style.border
+                    }
+                }
+                "border-b" => {
+                    style.border = UiRect {
+                        bottom: px(1.0),
+                        ..style.border
+                    }
+                }
+                "border-t" => {
+                    style.border = UiRect {
+                        top: px(1.0),
+                        ..style.border
+                    }
+                }
+
                 _ => {
-                    warn!("Unsupported style class: {class}");
+                    if REGEX.width.is_match(class) {
+                        let Some(captures) = REGEX.width.captures(class) else {
+                            continue;
+                        };
+                        let px_val = captures.get(1).unwrap().as_str().parse::<u64>().unwrap();
+                        style.width = px(px_val);
+                    } else if REGEX.min_width.is_match(class) {
+                        let Some(captures) = REGEX.min_width.captures(class) else {
+                            continue;
+                        };
+                        let px_val = captures.get(1).unwrap().as_str().parse::<u64>().unwrap();
+                        style.min_width = px(px_val);
+                    } else if REGEX.max_width.is_match(class) {
+                        let Some(captures) = REGEX.max_width.captures(class) else {
+                            continue;
+                        };
+                        let px_val = captures.get(1).unwrap().as_str().parse::<u64>().unwrap();
+                        style.max_width = px(px_val);
+                    } else if REGEX.height.is_match(class) {
+                        let Some(captures) = REGEX.height.captures(class) else {
+                            continue;
+                        };
+                        let px_val = captures.get(1).unwrap().as_str().parse::<u64>().unwrap();
+                        style.height = px(px_val);
+                    } else if REGEX.min_height.is_match(class) {
+                        let Some(captures) = REGEX.min_height.captures(class) else {
+                            continue;
+                        };
+                        let px_val = captures.get(1).unwrap().as_str().parse::<u64>().unwrap();
+                        style.min_height = px(px_val);
+                    } else if REGEX.max_height.is_match(class) {
+                        let Some(captures) = REGEX.max_height.captures(class) else {
+                            continue;
+                        };
+                        let px_val = captures.get(1).unwrap().as_str().parse::<u64>().unwrap();
+                        style.max_height = px(px_val);
+                    } else if REGEX.border.is_match(class) {
+                        let Some(captures) = REGEX.border.captures(class) else {
+                            continue;
+                        };
+                        let px_val = captures.get(1).unwrap().as_str().parse::<u64>().unwrap();
+                        style.border = UiRect::all(px(px_val));
+                    } else if REGEX.border_x.is_match(class) {
+                        let Some(captures) = REGEX.border_x.captures(class) else {
+                            continue;
+                        };
+                        let px_val = captures.get(1).unwrap().as_str().parse::<u64>().unwrap();
+                        style.border = UiRect {
+                            left: px(px_val),
+                            right: px(px_val),
+                            ..style.border
+                        };
+                    } else if REGEX.border_y.is_match(class) {
+                        let Some(captures) = REGEX.border_y.captures(class) else {
+                            continue;
+                        };
+                        let px_val = captures.get(1).unwrap().as_str().parse::<u64>().unwrap();
+                        style.border = UiRect {
+                            top: px(px_val),
+                            bottom: px(px_val),
+                            ..style.border
+                        };
+                    } else if REGEX.border_t.is_match(class) {
+                        let Some(captures) = REGEX.border_t.captures(class) else {
+                            continue;
+                        };
+                        let px_val = captures.get(1).unwrap().as_str().parse::<u64>().unwrap();
+                        style.border = UiRect {
+                            top: px(px_val),
+                            ..style.border
+                        };
+                    } else if REGEX.border_b.is_match(class) {
+                        let Some(captures) = REGEX.border_b.captures(class) else {
+                            continue;
+                        };
+                        let px_val = captures.get(1).unwrap().as_str().parse::<u64>().unwrap();
+                        style.border = UiRect {
+                            bottom: px(px_val),
+                            ..style.border
+                        };
+                    } else if REGEX.border_l.is_match(class) {
+                        let Some(captures) = REGEX.border_l.captures(class) else {
+                            continue;
+                        };
+                        let px_val = captures.get(1).unwrap().as_str().parse::<u64>().unwrap();
+                        style.border = UiRect {
+                            left: px(px_val),
+                            ..style.border
+                        };
+                    } else if REGEX.border_r.is_match(class) {
+                        let Some(captures) = REGEX.border_r.captures(class) else {
+                            continue;
+                        };
+                        let px_val = captures.get(1).unwrap().as_str().parse::<u64>().unwrap();
+                        style.border = UiRect {
+                            right: px(px_val),
+                            ..style.border
+                        };
+                    } else {
+                        warn!("Unsupported style class: {class}");
+                    }
                 }
             }
         }
 
-        Self {
-            visibility,
-            position,
-            display,
-            flex_direction,
-            justify_content,
-            justify_items,
-            justify_self,
-            align_content,
-            align_items,
-            align_self,
-            width,
-            height,
-        }
+        style
     }
 
     pub fn to_node(&self) -> impl Bundle {
@@ -212,10 +400,57 @@ impl Style {
                 align_items: self.align_items,
                 align_self: self.align_self,
                 width: self.width,
+                min_width: self.min_width,
+                max_width: self.max_width,
                 height: self.height,
+                min_height: self.min_height,
+                max_height: self.max_height,
+                border: self.border,
                 ..Default::default()
             },
             self.visibility,
+            self.border_color,
         )
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use bevy::prelude::px;
+    use bevy::ui::percent;
+
+    use crate::internal::tailwind::Style;
+
+    #[test]
+    fn test_0() {
+        let input = vec![
+            (
+                "w-[20px]",
+                Style {
+                    width: px(20),
+                    ..Default::default()
+                },
+            ),
+            (
+                "min-w-[120px]",
+                Style {
+                    min_width: px(120),
+                    ..Default::default()
+                },
+            ),
+            (
+                "w-full max-w-[200px] min-w-[120px]",
+                Style {
+                    width: percent(100),
+                    min_width: px(120),
+                    max_width: px(200),
+                    ..Default::default()
+                },
+            ),
+        ];
+
+        for (test, res) in input {
+            assert_eq!(Style::parse(test), res);
+        }
     }
 }
