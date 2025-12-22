@@ -5,4 +5,23 @@ edition = "2024"
 license = "MPL-2.0"
 authors = ["Niklas Pfister <git@omikron.dev>"]
 
+[[example]]
+name = "simple"
+path = "examples/simple/main.rs"
+
 [dependencies]
+# Error handling
+thiserror = { version = "~2" }
+# XML DOM
+roxmltree = { version = "~0.21" }
+# Parsing of tailscale classes
+regex = { version = "~1" }
+
+[dependencies.bevy]
+version = "~0.17"
+default-features = false
+features = ["bevy_asset", "bevy_ui"]
+
+[dev-dependencies]
+bevy = { version = "~0.17" }
+bevy-inspector-egui = { version = "~0.35" }
