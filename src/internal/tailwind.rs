@@ -335,7 +335,37 @@ impl Style {
                 }
 
                 "p-px" => style.padding = UiRect::all(px(1.0)),
+                "p-auto" => style.padding = UiRect::all(auto()),
+                "px-auto" => {
+                    style.padding = UiRect {
+                        left: auto(),
+                        right: auto(),
+                        ..style.padding
+                    }
+                }
+                "py-auto" => {
+                    style.padding = UiRect {
+                        top: auto(),
+                        bottom: auto(),
+                        ..style.padding
+                    }
+                }
                 "m-px" => style.margin = UiRect::all(px(1.0)),
+                "m-auto" => style.margin = UiRect::all(auto()),
+                "mx-auto" => {
+                    style.margin = UiRect {
+                        left: auto(),
+                        right: auto(),
+                        ..style.margin
+                    }
+                }
+                "my-auto" => {
+                    style.margin = UiRect {
+                        top: auto(),
+                        bottom: auto(),
+                        ..style.margin
+                    }
+                }
 
                 _ => {
                     if REGEX.width.is_match(class) {
