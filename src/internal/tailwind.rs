@@ -39,6 +39,7 @@ pub struct TailwindRegex {
     pub margin_l: Regex,
     pub margin_r: Regex,
     pub text_color: Regex,
+    pub z_index: Regex,
 }
 
 pub static REGEX: LazyLock<TailwindRegex> = LazyLock::new(|| TailwindRegex {
@@ -81,6 +82,7 @@ pub static REGEX: LazyLock<TailwindRegex> = LazyLock::new(|| TailwindRegex {
         r"text-\[#([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})?]$",
     )
     .unwrap(),
+    z_index: Regex::new(r"^(-)?z-(\d+)$").unwrap(),
 });
 
 #[derive(Debug, Clone, PartialEq)]
@@ -107,6 +109,7 @@ pub struct Style {
     pub padding: UiRect,
     pub margin: UiRect,
     pub text_color: TextColor,
+    pub z_index: ZIndex,
 }
 
 impl Default for Style {
@@ -134,6 +137,7 @@ impl Default for Style {
             margin: UiRect::default(),
             padding: UiRect::default(),
             text_color: TextColor::BLACK,
+            z_index: ZIndex::default(),
         }
     }
 }
@@ -607,6 +611,19 @@ impl Style {
 
                         style.text_color =
                             TextColor(Color::srgba_u8(color_r, color_g, color_b, color_a));
+                    } else if REGEX.z_index.is_match(class) {
+                        let Some(captures) = REGEX.z_index.captures(class) else {
+                            continue;
+                        };
+
+                        let negative = captures.get(1).map(|x| x.as_str() == "-").unwrap_or(false);
+                        let index = captures.get(2).unwrap().as_str().parse::<usize>().unwrap();
+
+                        style.z_index = ZIndex(if negative {
+                            -1 * index as i32
+                        } else {
+                            index as i32
+                        });
                     } else {
                         warn!("Unsupported style class: {class}");
                     }
@@ -644,6 +661,7 @@ impl Style {
             self.border_color,
             self.background_color,
             self.text_color,
+            self.z_index,
         )
     }
 }
