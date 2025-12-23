@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  pull_request:
+    paths-ignore:
+      - "**/*.md"
+  push:
+    paths-ignore:
+      - "**/*.md"
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      CARGO_TERM_COLOR: always
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: moonrepo/setup-rust@v1
+        with:
+          components: rustfmt
+          channel: nightly
+          bins: cargo-deny
+
+      - name: Check formatting
+        run: cargo +nightly fmt --check
+
+      - name: Run cargo-deny
+        run: cargo deny check --hide-inclusion-graph
+        if: github.ref == 'refs/heads/main'
+
+      - name: Compile crate
+        run: cargo build
+
+      - name: Compile examples
+        run: cargo build --examples
