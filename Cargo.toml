@@ -9,6 +9,10 @@ authors = ["Niklas Pfister <git@omikron.dev>"]
 name = "simple"
 path = "examples/simple/main.rs"
 
+[[example]]
+name = "marker"
+path = "examples/marker/main.rs"
+
 [dependencies]
 # Error handling
 thiserror = { version = "~2" }
