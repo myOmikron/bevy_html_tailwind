@@ -5,7 +5,7 @@
 - [x] Hot-reloading
 - [x] Loading images
 - [x] Using HTML id as a marker component
-- [ ] Custom fonts
+- [x] Custom fonts
 
 ## Setup
 
@@ -40,6 +40,10 @@ You can now use tailwind CSS for styling your nodes!
 </div>
 ```
 
+**Important!**
+
+Only one root node is allowed!
+
 ## Hot-reloading
 
 Hot-reloading is supported for HTML files. When you make changes to your HTML files, the changes will be automatically
@@ -53,6 +57,37 @@ tag and specifying the image path relative to your assets' directory. For exampl
 
 ```html
 <img src="images/example.png"/>
+```
+
+## Custom fonts
+
+To use custom fonts, we use an html-like structure with a `<head>` section for the definition
+of the fonts. Their `src` must be a valid path in your assets' directory.
+
+The first decendent of the `<body>` section will be used as your root node displaying-wise.
+
+```html
+
+<html>
+<head>
+    <!-- This node will be treated as root node -->
+    <font name="pixelify" src="fonts/pixelify.ttf"/>
+
+    <!-- Default fonts can also be set with this method -->
+    <font name="default" src="fonts/pixelify.ttf"/>
+    <!-- or -->
+    <font src="fonts/pixelify.ttf"/>
+</head>
+<body>
+
+<!-- This node will be treated as root node -->
+<div class="flex flex-col justify-center items-center w-full h-full">
+    <span class="font-pixelify">Heading with custom font</span>
+    <span>Custom default font</span>
+</div>
+
+</body>
+</html>
 ```
 
 ## Compatibility with bevy
