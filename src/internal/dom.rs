@@ -37,6 +37,7 @@ impl XNode {
 
 #[derive(Debug, Clone)]
 pub struct XDiv {
+    pub id: Option<String>,
     pub style: Style,
     pub content: Option<String>,
     pub children: Vec<XNode>,
@@ -44,6 +45,7 @@ pub struct XDiv {
 
 impl XDiv {
     pub fn convert(node: roxmltree::Node, load_context: &mut LoadContext) -> Self {
+        let mut id = None;
         let mut classes = "".to_string();
         let content = node
             .text()
@@ -53,8 +55,10 @@ impl XDiv {
         let mut children = Vec::new();
 
         for attribute in node.attributes() {
-            if attribute.name() == "class" {
-                classes = attribute.value().to_string();
+            match attribute.name() {
+                "class" => classes = attribute.value().to_string(),
+                "id" => id = Some(attribute.value().to_string()),
+                _ => {}
             }
         }
 
@@ -65,6 +69,7 @@ impl XDiv {
         }
 
         Self {
+            id,
             style: Style::parse(&classes),
             content,
             children,
@@ -88,6 +93,7 @@ impl XDiv {
 
 #[derive(Debug, Clone)]
 pub struct XText {
+    pub id: Option<String>,
     pub style: Style,
     pub content: Option<String>,
     pub children: Vec<XNode>,
@@ -95,6 +101,7 @@ pub struct XText {
 
 impl XText {
     pub fn convert(node: roxmltree::Node, load_context: &mut LoadContext) -> Self {
+        let mut id = None;
         let mut classes = String::new();
         let content = node
             .text()
@@ -104,8 +111,10 @@ impl XText {
         let mut children = Vec::new();
 
         for attribute in node.attributes() {
-            if attribute.name() == "class" {
-                classes = attribute.value().to_string();
+            match attribute.name() {
+                "class" => classes = attribute.value().to_string(),
+                "id" => id = Some(attribute.value().to_string()),
+                _ => {}
             }
         }
         for child in node.children() {
@@ -115,6 +124,7 @@ impl XText {
         }
 
         Self {
+            id,
             style: Style::parse(&classes),
             content,
             children,
@@ -139,6 +149,7 @@ impl XText {
 
 #[derive(Debug, Clone)]
 pub struct XImg {
+    pub id: Option<String>,
     pub style: Style,
     pub image_handle: Handle<Image>,
     pub children: Vec<XNode>,
@@ -146,6 +157,7 @@ pub struct XImg {
 
 impl XImg {
     pub fn convert(node: roxmltree::Node, load_context: &mut LoadContext) -> Self {
+        let mut id = None;
         let mut src = "".to_string();
         let mut classes = "".to_string();
         let mut children = Vec::new();
@@ -154,6 +166,7 @@ impl XImg {
             match attribute.name() {
                 "src" => src = attribute.value().to_string(),
                 "class" => classes = attribute.value().to_string(),
+                "id" => id = Some(attribute.value().to_string()),
                 _ => {}
             }
         }
@@ -167,6 +180,7 @@ impl XImg {
         }
 
         Self {
+            id,
             style: Style::parse(&classes),
             image_handle,
             children,
@@ -191,12 +205,14 @@ impl XImg {
 
 #[derive(Debug, Clone)]
 pub struct XButton {
+    pub id: Option<String>,
     pub style: Style,
     pub content: Option<String>,
     pub children: Vec<XNode>,
 }
 impl XButton {
     pub fn convert(node: roxmltree::Node, load_context: &mut LoadContext) -> Self {
+        let mut id = None;
         let content = node
             .text()
             .map(|t| t.trim())
@@ -206,8 +222,10 @@ impl XButton {
         let mut children = Vec::new();
 
         for attribute in node.attributes() {
-            if attribute.name() == "class" {
-                classes = attribute.value().to_string();
+            match attribute.name() {
+                "class" => classes = attribute.value().to_string(),
+                "id" => id = Some(attribute.value().to_string()),
+                _ => {}
             }
         }
 
@@ -218,6 +236,7 @@ impl XButton {
         }
 
         Self {
+            id,
             style: Style::parse(&classes),
             content,
             children,
