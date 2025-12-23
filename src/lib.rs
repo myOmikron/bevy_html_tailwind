@@ -1,14 +1,14 @@
 use bevy::prelude::*;
 
-use crate::assets::HtmlUi;
+use crate::assets::HtmlTailwind;
 use crate::assets::HtmlUiAssetLoader;
 use crate::systems::spawn_ui;
 use crate::systems::sync_system;
 
 pub mod prelude {
     pub use crate::HtmlTailwindPlugin;
-    pub use crate::assets::HtmlUi;
-    pub use crate::bundle::HtmlUiBundle;
+    pub use crate::assets::HtmlTailwind;
+    pub use crate::bundle::HtmlTailwindBundle;
 }
 
 mod assets;
@@ -28,7 +28,7 @@ impl Default for HtmlTailwindPlugin {
 
 impl Plugin for HtmlTailwindPlugin {
     fn build(&self, app: &mut App) {
-        app.init_asset::<HtmlUi>()
+        app.init_asset::<HtmlTailwind>()
             .init_asset_loader::<HtmlUiAssetLoader>()
             .add_systems(Update, spawn_ui);
 

@@ -9,7 +9,7 @@ use thiserror::Error;
 use crate::internal::dom::XNode;
 
 #[derive(Asset, TypePath, Debug)]
-pub struct HtmlUi {
+pub struct HtmlTailwind {
     pub dom: XNode,
 }
 
@@ -17,7 +17,7 @@ pub struct HtmlUi {
 pub struct HtmlUiAssetLoader;
 
 impl AssetLoader for HtmlUiAssetLoader {
-    type Asset = HtmlUi;
+    type Asset = HtmlTailwind;
     type Settings = ();
     type Error = HtmlUiLoadError;
 
@@ -34,7 +34,7 @@ impl AssetLoader for HtmlUiAssetLoader {
 
         document.root().children().next().unwrap();
 
-        let root = HtmlUi {
+        let root = HtmlTailwind {
             dom: XNode::convert(document.root().children().next().unwrap(), load_context),
         };
 

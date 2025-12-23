@@ -1,14 +1,14 @@
 use bevy::prelude::*;
 
-use crate::assets::HtmlUi;
+use crate::assets::HtmlTailwind;
 
 #[derive(Component, Reflect, Default)]
-pub struct HtmlUiHandle {
-    pub handle: Handle<HtmlUi>,
+pub struct HtmlTailwindHandle {
+    pub handle: Handle<HtmlTailwind>,
 }
 
-impl From<Handle<HtmlUi>> for HtmlUiHandle {
-    fn from(handle: Handle<HtmlUi>) -> Self {
+impl From<Handle<HtmlTailwind>> for HtmlTailwindHandle {
+    fn from(handle: Handle<HtmlTailwind>) -> Self {
         Self { handle }
     }
 }
@@ -17,14 +17,14 @@ impl From<Handle<HtmlUi>> for HtmlUiHandle {
 pub struct HtmlUiSpawned;
 
 #[derive(Bundle)]
-pub struct HtmlUiBundle {
-    pub ui: HtmlUiHandle,
+pub struct HtmlTailwindBundle {
+    pub ui: HtmlTailwindHandle,
     pub visibility: Visibility,
     pub name: Name,
     pub transform: Transform,
 }
 
-impl Default for HtmlUiBundle {
+impl Default for HtmlTailwindBundle {
     fn default() -> Self {
         Self {
             ui: Default::default(),

@@ -1,14 +1,14 @@
 use bevy::prelude::*;
 
-use crate::assets::HtmlUi;
-use crate::bundle::HtmlUiHandle;
+use crate::assets::HtmlTailwind;
+use crate::bundle::HtmlTailwindHandle;
 use crate::bundle::HtmlUiSpawned;
 
 /// Initial UI spawn
 pub fn spawn_ui(
     mut commands: Commands,
-    assets: Res<Assets<HtmlUi>>,
-    ui: Query<(Entity, &HtmlUiHandle), Without<HtmlUiSpawned>>,
+    assets: Res<Assets<HtmlTailwind>>,
+    ui: Query<(Entity, &HtmlTailwindHandle), Without<HtmlUiSpawned>>,
 ) {
     for (entity, handle) in ui {
         let Some(asset) = assets.get(handle.handle.id()) else {
@@ -25,9 +25,9 @@ pub fn spawn_ui(
 /// Hot-reloading
 pub fn sync_system(
     mut commands: Commands,
-    mut events: MessageReader<AssetEvent<HtmlUi>>,
-    assets: Res<Assets<HtmlUi>>,
-    ui: Query<(Entity, &HtmlUiHandle), With<HtmlUiSpawned>>,
+    mut events: MessageReader<AssetEvent<HtmlTailwind>>,
+    assets: Res<Assets<HtmlTailwind>>,
+    ui: Query<(Entity, &HtmlTailwindHandle), With<HtmlUiSpawned>>,
 ) {
     for event in events.read() {
         if let AssetEvent::Modified { id } = event {

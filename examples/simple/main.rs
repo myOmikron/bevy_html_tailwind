@@ -18,7 +18,7 @@ fn startup(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     // Spawn UI
     let handle = asset_server.load("simple/main.html");
-    commands.spawn(HtmlUiBundle {
+    commands.spawn(HtmlTailwindBundle {
         ui: handle.into(),
         name: Name::new("Main UI"),
         ..Default::default()
