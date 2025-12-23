@@ -24,6 +24,9 @@ jobs:
           channel: nightly
           bins: cargo-deny
 
+      - name: Install build dependencies
+        run: apt-get install -y libwayland-dev
+
       - name: Check formatting
         run: cargo +nightly fmt --check
 
