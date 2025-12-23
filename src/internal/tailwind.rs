@@ -1,7 +1,6 @@
 use std::sync::LazyLock;
 
 use bevy::color::Color;
-use bevy::log::info;
 use bevy::log::warn;
 use bevy::prelude::Bundle;
 use bevy::prelude::Visibility;
@@ -46,6 +45,10 @@ pub struct TailwindRegex {
     pub row_gap: Regex,
     pub column_gap: Regex,
     pub gap: Regex,
+    pub left: Regex,
+    pub right: Regex,
+    pub top: Regex,
+    pub bottom: Regex,
 }
 
 pub static REGEX: LazyLock<TailwindRegex> = LazyLock::new(|| TailwindRegex {
@@ -97,9 +100,13 @@ pub static REGEX: LazyLock<TailwindRegex> = LazyLock::new(|| TailwindRegex {
         r"^grid-rows-(?:(\d+)|\[((?:\d+fr|\d+px|auto)(?:_\d+fr|_\d+px|_auto)*)])$",
     )
     .unwrap(),
-    gap: Regex::new(r"gap-\[(\d+)px]").unwrap(),
-    row_gap: Regex::new(r"gap-y-\[(\d+)px]").unwrap(),
-    column_gap: Regex::new(r"gap-x-\[(\d+)px]").unwrap(),
+    gap: Regex::new(r"^gap-\[(\d+)px]$").unwrap(),
+    row_gap: Regex::new(r"^gap-y-\[(\d+)px]$").unwrap(),
+    column_gap: Regex::new(r"^gap-x-\[(\d+)px]$").unwrap(),
+    left: Regex::new(r"^(-)?left-\[(\d+)px]$").unwrap(),
+    right: Regex::new(r"^(-)?right-\[(\d+)px]$").unwrap(),
+    top: Regex::new(r"^(-)?top-\[(\d+)px]$").unwrap(),
+    bottom: Regex::new(r"^(-)?bottom-\[(\d+)px]$").unwrap(),
 });
 
 #[derive(Debug, Clone, PartialEq)]
@@ -131,6 +138,10 @@ pub struct Style {
     pub grid_template_rows: Vec<RepeatedGridTrack>,
     pub row_gap: Val,
     pub column_gap: Val,
+    pub top: Val,
+    pub bottom: Val,
+    pub left: Val,
+    pub right: Val,
 }
 
 impl Default for Style {
@@ -163,6 +174,10 @@ impl Default for Style {
             grid_template_rows: vec![],
             row_gap: auto(),
             column_gap: auto(),
+            right: auto(),
+            top: auto(),
+            bottom: auto(),
+            left: auto(),
         }
     }
 }
@@ -764,6 +779,58 @@ impl Style {
 
                         style.column_gap = px(gap);
                         style.row_gap = px(gap);
+                    } else if REGEX.left.is_match(class) {
+                        let Some(captures) = REGEX.left.captures(class) else {
+                            continue;
+                        };
+
+                        let negative = captures.get(1).map(|x| x.as_str() == "-").unwrap_or(false);
+                        let distance = captures.get(2).unwrap().as_str().parse::<isize>().unwrap();
+
+                        style.left = if negative {
+                            px(-1 * distance)
+                        } else {
+                            px(distance)
+                        };
+                    } else if REGEX.right.is_match(class) {
+                        let Some(captures) = REGEX.right.captures(class) else {
+                            continue;
+                        };
+
+                        let negative = captures.get(1).map(|x| x.as_str() == "-").unwrap_or(false);
+                        let distance = captures.get(2).unwrap().as_str().parse::<isize>().unwrap();
+
+                        style.right = if negative {
+                            px(-1 * distance)
+                        } else {
+                            px(distance)
+                        };
+                    } else if REGEX.bottom.is_match(class) {
+                        let Some(captures) = REGEX.bottom.captures(class) else {
+                            continue;
+                        };
+
+                        let negative = captures.get(1).map(|x| x.as_str() == "-").unwrap_or(false);
+                        let distance = captures.get(2).unwrap().as_str().parse::<isize>().unwrap();
+
+                        style.bottom = if negative {
+                            px(-1 * distance)
+                        } else {
+                            px(distance)
+                        };
+                    } else if REGEX.top.is_match(class) {
+                        let Some(captures) = REGEX.top.captures(class) else {
+                            continue;
+                        };
+
+                        let negative = captures.get(1).map(|x| x.as_str() == "-").unwrap_or(false);
+                        let distance = captures.get(2).unwrap().as_str().parse::<isize>().unwrap();
+
+                        style.top = if negative {
+                            px(-1 * distance)
+                        } else {
+                            px(distance)
+                        };
                     } else {
                         warn!("Unsupported style class: {class}");
                     }
