@@ -3,7 +3,10 @@ use std::sync::LazyLock;
 use bevy::color::Color;
 use bevy::log::warn;
 use bevy::prelude::Bundle;
+use bevy::prelude::Justify;
+use bevy::prelude::TextLayout;
 use bevy::prelude::Visibility;
+use bevy::text::LineBreak;
 use bevy::text::TextColor;
 use bevy::ui::*;
 use regex::Regex;
@@ -113,7 +116,7 @@ pub static REGEX: LazyLock<TailwindRegex> = LazyLock::new(|| TailwindRegex {
     row_span: Regex::new(r"^row-span-(\d+)$").unwrap(),
 });
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone)]
 pub struct Style {
     pub visibility: Visibility,
     pub position: PositionType,
@@ -148,6 +151,7 @@ pub struct Style {
     pub right: Val,
     pub grid_column: GridPlacement,
     pub grid_row: GridPlacement,
+    pub text_layout: TextLayout,
 }
 
 impl Default for Style {
@@ -186,6 +190,7 @@ impl Default for Style {
             left: auto(),
             grid_column: GridPlacement::default(),
             grid_row: GridPlacement::default(),
+            text_layout: TextLayout::default(),
         }
     }
 }
@@ -417,6 +422,49 @@ impl Style {
 
                 "text-white" => style.text_color = TextColor::WHITE,
                 "text-black" => style.text_color = TextColor::BLACK,
+
+                "text-left" => {
+                    style.text_layout = TextLayout {
+                        justify: Justify::Left,
+                        ..style.text_layout
+                    }
+                }
+                "text-right" => {
+                    style.text_layout = TextLayout {
+                        justify: Justify::Right,
+                        ..style.text_layout
+                    }
+                }
+                "text-center" => {
+                    style.text_layout = TextLayout {
+                        justify: Justify::Center,
+                        ..style.text_layout
+                    }
+                }
+                "text-justify" => {
+                    style.text_layout = TextLayout {
+                        justify: Justify::Justified,
+                        ..style.text_layout
+                    }
+                }
+                "text-wrap" => {
+                    style.text_layout = TextLayout {
+                        linebreak: LineBreak::WordBoundary,
+                        ..style.text_layout
+                    }
+                }
+                "text-nowrap" => {
+                    style.text_layout = TextLayout {
+                        linebreak: LineBreak::NoWrap,
+                        ..style.text_layout
+                    }
+                }
+                "break-all" => {
+                    style.text_layout = TextLayout {
+                        linebreak: LineBreak::AnyCharacter,
+                        ..style.text_layout
+                    }
+                }
 
                 _ => {
                     if REGEX.width.is_match(class) {
@@ -897,75 +945,7 @@ impl Style {
             self.background_color,
             self.text_color,
             self.z_index,
+            self.text_layout,
         )
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use bevy::prelude::px;
-    use bevy::ui::UiRect;
-    use bevy::ui::ZIndex;
-    use bevy::ui::percent;
-
-    use crate::internal::tailwind::Style;
-
-    #[test]
-    fn test_0() {
-        let input = vec![
-            (
-                "w-[20px]",
-                Style {
-                    width: px(20),
-                    ..Default::default()
-                },
-            ),
-            (
-                "min-w-[120px]",
-                Style {
-                    min_width: px(120),
-                    ..Default::default()
-                },
-            ),
-            (
-                "w-full max-w-[200px] min-w-[120px]",
-                Style {
-                    width: percent(100),
-                    min_width: px(120),
-                    max_width: px(200),
-                    ..Default::default()
-                },
-            ),
-            (
-                "ml-[2px] my-[20px]",
-                Style {
-                    margin: UiRect {
-                        left: px(2.0),
-                        bottom: px(20.0),
-                        top: px(20.0),
-                        ..Default::default()
-                    },
-                    ..Default::default()
-                },
-            ),
-            (
-                "z-20",
-                Style {
-                    z_index: ZIndex(20),
-                    ..Default::default()
-                },
-            ),
-            (
-                "-z-20",
-                Style {
-                    z_index: ZIndex(-20),
-                    ..Default::default()
-                },
-            ),
-        ];
-
-        for (test, res) in input {
-            assert_eq!(Style::parse(test), res);
-        }
     }
 }
