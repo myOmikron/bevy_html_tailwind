@@ -9,6 +9,7 @@ use bevy::prelude::Font;
 use bevy::prelude::Justify;
 use bevy::prelude::TextLayout;
 use bevy::prelude::Visibility;
+use bevy::text::FontSmoothing;
 use bevy::text::LineBreak;
 use bevy::text::LineHeight;
 use bevy::text::TextColor;
@@ -668,6 +669,12 @@ impl Style {
                 }
                 "rounded-br-4xl" => {
                     style.border_radius = style.border_radius.with_bottom_right(px(32))
+                }
+
+                "antialiased" => {
+                    style.text_font = style
+                        .text_font
+                        .with_font_smoothing(FontSmoothing::AntiAliased)
                 }
 
                 _ => {
