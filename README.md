@@ -29,6 +29,17 @@ fn load_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
 }
 ```
 
+In the corresponding `assets` directory, place your HTML file `menu.html`.
+You can now use tailwind CSS for styling your nodes!
+
+```html
+
+<div class="flex flex-col w-full h-full justify-center items-center gap-[20px]">
+    <button>Start</button>
+    <button>Exit</button>
+</div>
+```
+
 ## Hot-reloading
 
 Hot-reloading is supported for HTML files. When you make changes to your HTML files, the changes will be automatically
