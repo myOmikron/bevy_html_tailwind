@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use log::info;
 
 use crate::assets::HtmlTailwind;
 use crate::bundle::HtmlId;

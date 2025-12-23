@@ -26,6 +26,8 @@ thiserror = { version = "~2" }
 roxmltree = { version = "~0.21" }
 # Parsing of tailscale classes
 regex = { version = "~1" }
+# Logging
+log = { version = "~0.4" }
 
 [dependencies.bevy]
 version = "~0.17"

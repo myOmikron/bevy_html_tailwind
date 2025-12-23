@@ -2,7 +2,6 @@ use std::sync::LazyLock;
 
 use bevy::asset::Handle;
 use bevy::color::Color;
-use bevy::log::warn;
 use bevy::platform::collections::HashMap;
 use bevy::prelude::Bundle;
 use bevy::prelude::Font;
@@ -15,6 +14,7 @@ use bevy::text::LineHeight;
 use bevy::text::TextColor;
 use bevy::text::TextFont;
 use bevy::ui::*;
+use log::warn;
 use regex::Regex;
 
 pub struct TailwindRegex {

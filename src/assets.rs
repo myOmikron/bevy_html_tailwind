@@ -4,6 +4,7 @@ use bevy::asset::LoadContext;
 use bevy::asset::io::Reader;
 use bevy::platform::collections::HashMap;
 use bevy::prelude::*;
+use log::trace;
 use roxmltree::Document;
 use thiserror::Error;
 
@@ -99,7 +100,7 @@ impl AssetLoader for HtmlUiAssetLoader {
             default_font,
         };
 
-        info!("Root node: {root:#?}");
+        trace!("Root node: {root:#?}");
 
         Ok(root)
     }
