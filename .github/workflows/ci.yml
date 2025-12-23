@@ -25,7 +25,9 @@ jobs:
           bins: cargo-deny
 
       - name: Install build dependencies
-        run: sudo apt-get install -y libwayland-dev libasound2-dev libudev-dev
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwayland-dev libasound2-dev libudev-dev
 
       - name: Check formatting
         run: cargo +nightly fmt --check
