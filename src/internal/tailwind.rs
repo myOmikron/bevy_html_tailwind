@@ -61,6 +61,11 @@ pub struct TailwindRegex {
     pub row_span: Regex,
     pub custom_font: Regex,
     pub font_size: Regex,
+    pub border_radius: Regex,
+    pub border_radius_tl: Regex,
+    pub border_radius_tr: Regex,
+    pub border_radius_bl: Regex,
+    pub border_radius_br: Regex,
 }
 
 pub static REGEX: LazyLock<TailwindRegex> = LazyLock::new(|| TailwindRegex {
@@ -123,6 +128,11 @@ pub static REGEX: LazyLock<TailwindRegex> = LazyLock::new(|| TailwindRegex {
     row_span: Regex::new(r"^row-span-(\d+)$").unwrap(),
     custom_font: Regex::new(r"^font-(\w+)$").unwrap(),
     font_size: Regex::new(r"^font-size-\[(\d+)px]$").unwrap(),
+    border_radius: Regex::new(r"^border-\[(\d+)px]$").unwrap(),
+    border_radius_bl: Regex::new(r"^border-bl-\[(\d+)px]$").unwrap(),
+    border_radius_br: Regex::new(r"^border-br-\[(\d+)px]$").unwrap(),
+    border_radius_tl: Regex::new(r"^border-tl-\[(\d+)px]$").unwrap(),
+    border_radius_tr: Regex::new(r"^border-tr-\[(\d+)px]$").unwrap(),
 });
 
 #[derive(Debug, Clone)]
@@ -162,6 +172,7 @@ pub struct Style {
     pub grid_row: GridPlacement,
     pub text_layout: TextLayout,
     pub text_font: TextFont,
+    pub border_radius: BorderRadius,
 }
 
 impl Default for Style {
@@ -202,6 +213,7 @@ impl Default for Style {
             grid_row: GridPlacement::default(),
             text_layout: TextLayout::default(),
             text_font: TextFont::default(),
+            border_radius: BorderRadius::default(),
         }
     }
 }
@@ -576,6 +588,86 @@ impl Style {
                         line_height: LineHeight::RelativeToFont(1.0),
                         ..style.text_font
                     }
+                }
+
+                "rounded-xs" => style.border_radius = BorderRadius::all(px(2)),
+                "rounded-sm" => style.border_radius = BorderRadius::all(px(4)),
+                "rounded-md" => style.border_radius = BorderRadius::all(px(6)),
+                "rounded-lg" => style.border_radius = BorderRadius::all(px(8)),
+                "rounded-xl" => style.border_radius = BorderRadius::all(px(12)),
+                "rounded-2xl" => style.border_radius = BorderRadius::all(px(16)),
+                "rounded-3xl" => style.border_radius = BorderRadius::all(px(24)),
+                "rounded-4xl" => style.border_radius = BorderRadius::all(px(32)),
+                "rounded-full" => style.border_radius = BorderRadius::MAX,
+                "rounded-tl-xs" => style.border_radius = style.border_radius.with_top_left(px(2)),
+                "rounded-tr-xs" => style.border_radius = style.border_radius.with_top_right(px(2)),
+                "rounded-bl-xs" => {
+                    style.border_radius = style.border_radius.with_bottom_left(px(2))
+                }
+                "rounded-br-xs" => {
+                    style.border_radius = style.border_radius.with_bottom_right(px(2))
+                }
+                "rounded-tl-sm" => style.border_radius = style.border_radius.with_top_left(px(4)),
+                "rounded-tr-sm" => style.border_radius = style.border_radius.with_top_right(px(4)),
+                "rounded-bl-sm" => {
+                    style.border_radius = style.border_radius.with_bottom_left(px(4))
+                }
+                "rounded-br-sm" => {
+                    style.border_radius = style.border_radius.with_bottom_right(px(4))
+                }
+                "rounded-tl-md" => style.border_radius = style.border_radius.with_top_left(px(6)),
+                "rounded-tr-md" => style.border_radius = style.border_radius.with_top_right(px(6)),
+                "rounded-bl-md" => {
+                    style.border_radius = style.border_radius.with_bottom_left(px(6))
+                }
+                "rounded-br-md" => {
+                    style.border_radius = style.border_radius.with_bottom_right(px(6))
+                }
+                "rounded-tl-lg" => style.border_radius = style.border_radius.with_top_left(px(8)),
+                "rounded-tr-lg" => style.border_radius = style.border_radius.with_top_right(px(8)),
+                "rounded-bl-lg" => {
+                    style.border_radius = style.border_radius.with_bottom_left(px(8))
+                }
+                "rounded-br-lg" => {
+                    style.border_radius = style.border_radius.with_bottom_right(px(8))
+                }
+                "rounded-tl-xl" => style.border_radius = style.border_radius.with_top_left(px(12)),
+                "rounded-tr-xl" => style.border_radius = style.border_radius.with_top_right(px(12)),
+                "rounded-bl-xl" => {
+                    style.border_radius = style.border_radius.with_bottom_left(px(12))
+                }
+                "rounded-br-xl" => {
+                    style.border_radius = style.border_radius.with_bottom_right(px(12))
+                }
+                "rounded-tl-2xl" => style.border_radius = style.border_radius.with_top_left(px(16)),
+                "rounded-tr-2xl" => {
+                    style.border_radius = style.border_radius.with_top_right(px(16))
+                }
+                "rounded-bl-2xl" => {
+                    style.border_radius = style.border_radius.with_bottom_left(px(16))
+                }
+                "rounded-br-2xl" => {
+                    style.border_radius = style.border_radius.with_bottom_right(px(16))
+                }
+                "rounded-tl-3xl" => style.border_radius = style.border_radius.with_top_left(px(24)),
+                "rounded-tr-3xl" => {
+                    style.border_radius = style.border_radius.with_top_right(px(24))
+                }
+                "rounded-bl-3xl" => {
+                    style.border_radius = style.border_radius.with_bottom_left(px(24))
+                }
+                "rounded-br-3xl" => {
+                    style.border_radius = style.border_radius.with_bottom_right(px(24))
+                }
+                "rounded-tl-4xl" => style.border_radius = style.border_radius.with_top_left(px(32)),
+                "rounded-tr-4xl" => {
+                    style.border_radius = style.border_radius.with_top_right(px(32))
+                }
+                "rounded-bl-4xl" => {
+                    style.border_radius = style.border_radius.with_bottom_left(px(32))
+                }
+                "rounded-br-4xl" => {
+                    style.border_radius = style.border_radius.with_bottom_right(px(32))
                 }
 
                 _ => {
@@ -1036,6 +1128,48 @@ impl Style {
                             font_size: font_size as f32,
                             ..style.text_font
                         };
+                    } else if REGEX.border_radius.is_match(class) {
+                        let Some(captures) = REGEX.border_radius.captures(class) else {
+                            continue;
+                        };
+
+                        let border_radius =
+                            captures.get(1).unwrap().as_str().parse::<usize>().unwrap();
+                        style.border_radius = BorderRadius::all(px(border_radius));
+                    } else if REGEX.border_radius_bl.is_match(class) {
+                        let Some(captures) = REGEX.border_radius_bl.captures(class) else {
+                            continue;
+                        };
+
+                        let border_radius =
+                            captures.get(1).unwrap().as_str().parse::<usize>().unwrap();
+                        style.border_radius =
+                            style.border_radius.with_bottom_left(px(border_radius));
+                    } else if REGEX.border_radius_br.is_match(class) {
+                        let Some(captures) = REGEX.border_radius_br.captures(class) else {
+                            continue;
+                        };
+
+                        let border_radius =
+                            captures.get(1).unwrap().as_str().parse::<usize>().unwrap();
+                        style.border_radius =
+                            style.border_radius.with_bottom_right(px(border_radius));
+                    } else if REGEX.border_radius_tl.is_match(class) {
+                        let Some(captures) = REGEX.border_radius_tl.captures(class) else {
+                            continue;
+                        };
+
+                        let border_radius =
+                            captures.get(1).unwrap().as_str().parse::<usize>().unwrap();
+                        style.border_radius = style.border_radius.with_top_left(px(border_radius));
+                    } else if REGEX.border_radius_tr.is_match(class) {
+                        let Some(captures) = REGEX.border_radius_tr.captures(class) else {
+                            continue;
+                        };
+
+                        let border_radius =
+                            captures.get(1).unwrap().as_str().parse::<usize>().unwrap();
+                        style.border_radius = style.border_radius.with_top_right(px(border_radius));
                     } else {
                         warn!("Unsupported style class: {class}");
                     }
@@ -1086,6 +1220,7 @@ impl Style {
             self.z_index,
             self.text_layout,
             self.text_font.clone(),
+            self.border_radius,
         )
     }
 }
