@@ -1,6 +1,7 @@
 use std::sync::LazyLock;
 
 use bevy::color::Color;
+use bevy::log::info;
 use bevy::log::warn;
 use bevy::prelude::Bundle;
 use bevy::prelude::Visibility;
@@ -40,6 +41,7 @@ pub struct TailwindRegex {
     pub margin_r: Regex,
     pub text_color: Regex,
     pub z_index: Regex,
+    pub grid_template_columns: Regex,
 }
 
 pub static REGEX: LazyLock<TailwindRegex> = LazyLock::new(|| TailwindRegex {
@@ -83,6 +85,10 @@ pub static REGEX: LazyLock<TailwindRegex> = LazyLock::new(|| TailwindRegex {
     )
     .unwrap(),
     z_index: Regex::new(r"^(-)?z-(\d+)$").unwrap(),
+    grid_template_columns: Regex::new(
+        r"^grid-cols-(?:(\d+)|\[((?:\d+fr|\d+px|auto)(?:_\d+fr|_\d+px|_auto)*)])$",
+    )
+    .unwrap(),
 });
 
 #[derive(Debug, Clone, PartialEq)]
@@ -110,6 +116,7 @@ pub struct Style {
     pub margin: UiRect,
     pub text_color: TextColor,
     pub z_index: ZIndex,
+    pub grid_template_columns: Vec<RepeatedGridTrack>,
 }
 
 impl Default for Style {
@@ -138,6 +145,7 @@ impl Default for Style {
             padding: UiRect::default(),
             text_color: TextColor::BLACK,
             z_index: ZIndex::default(),
+            grid_template_columns: vec![],
         }
     }
 }
@@ -657,6 +665,34 @@ impl Style {
                         } else {
                             index as i32
                         });
+                    } else if REGEX.grid_template_columns.is_match(class) {
+                        let Some(captures) = REGEX.grid_template_columns.captures(class) else {
+                            continue;
+                        };
+
+                        if let Some(c) = captures.get(1) {
+                            let columns = c.as_str().parse::<u16>().unwrap();
+                            style.grid_template_columns = RepeatedGridTrack::auto(columns);
+                            continue;
+                        }
+
+                        let Some(matches) = captures.get(2).map(|x| x.as_str()) else {
+                            continue;
+                        };
+
+                        let mut columns = vec![];
+                        for part in matches.split('_') {
+                            if part == "auto" {
+                                columns.push(RepeatedGridTrack::auto(1));
+                            } else if part.ends_with("fr") {
+                                let count = part.trim_end_matches("fr").parse::<u16>().unwrap();
+                                columns.push(RepeatedGridTrack::fr(1, count as f32));
+                            } else if part.ends_with("px") {
+                                let count = part.trim_end_matches("px").parse::<u16>().unwrap();
+                                columns.push(RepeatedGridTrack::px(1, count as f32));
+                            }
+                        }
+                        style.grid_template_columns = columns;
                     } else {
                         warn!("Unsupported style class: {class}");
                     }
@@ -688,6 +724,7 @@ impl Style {
                 border: self.border,
                 padding: self.padding,
                 margin: self.margin,
+                grid_template_columns: self.grid_template_columns.clone(),
                 ..Default::default()
             },
             self.visibility,
@@ -703,6 +740,7 @@ impl Style {
 mod tests {
     use bevy::prelude::px;
     use bevy::ui::UiRect;
+    use bevy::ui::ZIndex;
     use bevy::ui::percent;
 
     use crate::internal::tailwind::Style;
@@ -742,6 +780,20 @@ mod tests {
                         top: px(20.0),
                         ..Default::default()
                     },
+                    ..Default::default()
+                },
+            ),
+            (
+                "z-20",
+                Style {
+                    z_index: ZIndex(20),
+                    ..Default::default()
+                },
+            ),
+            (
+                "-z-20",
+                Style {
+                    z_index: ZIndex(-20),
                     ..Default::default()
                 },
             ),
