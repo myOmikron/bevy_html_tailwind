@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 license = "MPL-2.0"
 authors = ["Niklas Pfister <git@omikron.dev>"]
-repository = "github.com/myOmikron/bevy_html_tailwind"
+repository = "https://github.com/myOmikron/bevy_html_tailwind"
 description = "Use HTML + Tailwind CSS to generate bevy ui trees"
 
 [[example]]
