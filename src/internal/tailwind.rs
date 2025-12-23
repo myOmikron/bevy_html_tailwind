@@ -42,6 +42,7 @@ pub struct TailwindRegex {
     pub text_color: Regex,
     pub z_index: Regex,
     pub grid_template_columns: Regex,
+    pub grid_template_rows: Regex,
 }
 
 pub static REGEX: LazyLock<TailwindRegex> = LazyLock::new(|| TailwindRegex {
@@ -89,6 +90,10 @@ pub static REGEX: LazyLock<TailwindRegex> = LazyLock::new(|| TailwindRegex {
         r"^grid-cols-(?:(\d+)|\[((?:\d+fr|\d+px|auto)(?:_\d+fr|_\d+px|_auto)*)])$",
     )
     .unwrap(),
+    grid_template_rows: Regex::new(
+        r"^grid-rows-(?:(\d+)|\[((?:\d+fr|\d+px|auto)(?:_\d+fr|_\d+px|_auto)*)])$",
+    )
+    .unwrap(),
 });
 
 #[derive(Debug, Clone, PartialEq)]
@@ -117,6 +122,7 @@ pub struct Style {
     pub text_color: TextColor,
     pub z_index: ZIndex,
     pub grid_template_columns: Vec<RepeatedGridTrack>,
+    pub grid_template_rows: Vec<RepeatedGridTrack>,
 }
 
 impl Default for Style {
@@ -146,6 +152,7 @@ impl Default for Style {
             text_color: TextColor::BLACK,
             z_index: ZIndex::default(),
             grid_template_columns: vec![],
+            grid_template_rows: vec![],
         }
     }
 }
@@ -693,6 +700,34 @@ impl Style {
                             }
                         }
                         style.grid_template_columns = columns;
+                    } else if REGEX.grid_template_rows.is_match(class) {
+                        let Some(captures) = REGEX.grid_template_rows.captures(class) else {
+                            continue;
+                        };
+
+                        if let Some(c) = captures.get(1) {
+                            let rows = c.as_str().parse::<u16>().unwrap();
+                            style.grid_template_rows = RepeatedGridTrack::auto(rows);
+                            continue;
+                        }
+
+                        let Some(matches) = captures.get(2).map(|x| x.as_str()) else {
+                            continue;
+                        };
+
+                        let mut rows = vec![];
+                        for part in matches.split('_') {
+                            if part == "auto" {
+                                rows.push(RepeatedGridTrack::auto(1));
+                            } else if part.ends_with("fr") {
+                                let count = part.trim_end_matches("fr").parse::<u16>().unwrap();
+                                rows.push(RepeatedGridTrack::fr(1, count as f32));
+                            } else if part.ends_with("px") {
+                                let count = part.trim_end_matches("px").parse::<u16>().unwrap();
+                                rows.push(RepeatedGridTrack::px(1, count as f32));
+                            }
+                        }
+                        style.grid_template_rows = rows;
                     } else {
                         warn!("Unsupported style class: {class}");
                     }
@@ -725,6 +760,7 @@ impl Style {
                 padding: self.padding,
                 margin: self.margin,
                 grid_template_columns: self.grid_template_columns.clone(),
+                grid_template_rows: self.grid_template_rows.clone(),
                 ..Default::default()
             },
             self.visibility,
