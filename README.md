@@ -49,3 +49,11 @@ tag and specifying the image path relative to your assets' directory. For exampl
 | Bevy Version | bevy_html_tailwind |
 |--------------|--------------------|
 | 0.17         | 0.1                |
+
+## Contributing
+
+Contributions are welcome!
+If you find any issues or have suggestions for improvements, please open an issue or submit a PR.
+
+Make sure to format your code using the provided `.rustfmt.toml`.
+(Nightly is currently required: `cargo +nightly fmt`)
