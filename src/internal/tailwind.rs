@@ -938,6 +938,10 @@ impl Style {
                 column_gap: self.column_gap,
                 grid_column: self.grid_column,
                 grid_row: self.grid_row,
+                bottom: self.bottom,
+                top: self.top,
+                left: self.left,
+                right: self.right,
                 ..Default::default()
             },
             self.visibility,
