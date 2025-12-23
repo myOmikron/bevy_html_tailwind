@@ -2,13 +2,14 @@ use std::collections::HashMap;
 
 use bevy::prelude::*;
 
-/// Resource that marks components on entities based on HTML IDs
+/// Resource for managing HTML marker components and custom fonts
 #[derive(Resource, Default)]
-pub struct HtmlMarkerRegistry {
+pub struct HtmlTailwindRegistry {
+    /// Lookup for HTML ids and the corresponding function to apply the marker component
     markers: HashMap<String, Vec<Box<dyn Fn(&mut EntityCommands) + Send + Sync>>>,
 }
 
-impl HtmlMarkerRegistry {
+impl HtmlTailwindRegistry {
     pub(crate) fn add_marker<M: Component + Default>(&mut self, html_id: String) {
         self.markers
             .entry(html_id)
@@ -42,7 +43,7 @@ impl HtmlMarkerRegistry {
 }
 
 /// Extension trait for registering HTML markers
-pub trait HtmlMarkerAppExt {
+pub trait HtmlTailwindAppExt {
     fn register_html_marker<M: Component + Default>(
         &mut self,
         html_id: impl Into<String>,
@@ -55,7 +56,7 @@ pub trait HtmlMarkerAppExt {
     ) -> &mut Self;
 }
 
-impl HtmlMarkerAppExt for App {
+impl HtmlTailwindAppExt for App {
     fn register_html_marker<M: Component + Default>(
         &mut self,
         html_id: impl Into<String>,
@@ -63,7 +64,7 @@ impl HtmlMarkerAppExt for App {
         let html_id = html_id.into();
 
         self.world_mut()
-            .resource_mut::<HtmlMarkerRegistry>()
+            .resource_mut::<HtmlTailwindRegistry>()
             .add_marker::<M>(html_id);
 
         self
@@ -77,7 +78,7 @@ impl HtmlMarkerAppExt for App {
         let html_id = html_id.into();
 
         self.world_mut()
-            .resource_mut::<HtmlMarkerRegistry>()
+            .resource_mut::<HtmlTailwindRegistry>()
             .add_marker_with(html_id, marker);
 
         self

@@ -4,7 +4,7 @@ use crate::assets::HtmlTailwind;
 use crate::bundle::HtmlId;
 use crate::bundle::HtmlTailwindHandle;
 use crate::bundle::HtmlTailwindSpawned;
-use crate::registry::HtmlMarkerRegistry;
+use crate::registry::HtmlTailwindRegistry;
 
 /// Spawn the node tree on the entity
 ///
@@ -29,7 +29,7 @@ pub fn spawn_ui(
 /// Applies marker components to newly created HTML nodes
 pub fn apply_markers(
     mut commands: Commands,
-    registry: Option<Res<HtmlMarkerRegistry>>,
+    registry: Option<Res<HtmlTailwindRegistry>>,
     new_nodes: Query<(Entity, &HtmlId), Added<HtmlId>>,
 ) {
     let Some(registry) = registry else { return };

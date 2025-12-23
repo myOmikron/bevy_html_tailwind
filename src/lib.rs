@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::assets::HtmlTailwind;
 use crate::assets::HtmlUiAssetLoader;
-use crate::registry::HtmlMarkerRegistry;
+use crate::registry::HtmlTailwindRegistry;
 use crate::systems::apply_markers;
 use crate::systems::spawn_ui;
 use crate::systems::sync_system;
@@ -11,7 +11,7 @@ pub mod prelude {
     pub use crate::HtmlTailwindPlugin;
     pub use crate::assets::HtmlTailwind;
     pub use crate::bundle::HtmlTailwindBundle;
-    pub use crate::registry::HtmlMarkerAppExt;
+    pub use crate::registry::HtmlTailwindAppExt;
 }
 
 mod assets;
@@ -34,7 +34,7 @@ impl Plugin for HtmlTailwindPlugin {
     fn build(&self, app: &mut App) {
         app.init_asset::<HtmlTailwind>()
             .init_asset_loader::<HtmlUiAssetLoader>()
-            .init_resource::<HtmlMarkerRegistry>()
+            .init_resource::<HtmlTailwindRegistry>()
             .add_systems(Update, (spawn_ui, apply_markers).chain());
 
         if self.hot_reload {

@@ -1,13 +1,18 @@
 use std::sync::LazyLock;
 
+use bevy::asset::Handle;
 use bevy::color::Color;
 use bevy::log::warn;
+use bevy::platform::collections::HashMap;
 use bevy::prelude::Bundle;
+use bevy::prelude::Font;
 use bevy::prelude::Justify;
 use bevy::prelude::TextLayout;
 use bevy::prelude::Visibility;
 use bevy::text::LineBreak;
+use bevy::text::LineHeight;
 use bevy::text::TextColor;
+use bevy::text::TextFont;
 use bevy::ui::*;
 use regex::Regex;
 
@@ -54,6 +59,8 @@ pub struct TailwindRegex {
     pub bottom: Regex,
     pub col_span: Regex,
     pub row_span: Regex,
+    pub custom_font: Regex,
+    pub font_size: Regex,
 }
 
 pub static REGEX: LazyLock<TailwindRegex> = LazyLock::new(|| TailwindRegex {
@@ -114,6 +121,8 @@ pub static REGEX: LazyLock<TailwindRegex> = LazyLock::new(|| TailwindRegex {
     bottom: Regex::new(r"^(-)?bottom-\[(\d+)px]$").unwrap(),
     col_span: Regex::new(r"^col-span-(\d+)$").unwrap(),
     row_span: Regex::new(r"^row-span-(\d+)$").unwrap(),
+    custom_font: Regex::new(r"^font-(\w+)$").unwrap(),
+    font_size: Regex::new(r"^font-size-\[(\d+)px]$").unwrap(),
 });
 
 #[derive(Debug, Clone)]
@@ -152,6 +161,7 @@ pub struct Style {
     pub grid_column: GridPlacement,
     pub grid_row: GridPlacement,
     pub text_layout: TextLayout,
+    pub text_font: TextFont,
 }
 
 impl Default for Style {
@@ -191,12 +201,17 @@ impl Default for Style {
             grid_column: GridPlacement::default(),
             grid_row: GridPlacement::default(),
             text_layout: TextLayout::default(),
+            text_font: TextFont::default(),
         }
     }
 }
 
 impl Style {
-    pub fn parse(classes: &str) -> Self {
+    pub fn parse(
+        classes: &str,
+        fonts: &HashMap<String, Handle<Font>>,
+        default_font: Option<Handle<Font>>,
+    ) -> Self {
         let classes = classes
             .trim()
             .split_ascii_whitespace()
@@ -204,6 +219,12 @@ impl Style {
             .collect::<Vec<_>>();
 
         let mut style = Style::default();
+        if let Some(default_font) = default_font {
+            style.text_font = TextFont {
+                font: default_font,
+                ..Default::default()
+            };
+        }
 
         for class in classes {
             match class {
@@ -463,6 +484,97 @@ impl Style {
                     style.text_layout = TextLayout {
                         linebreak: LineBreak::AnyCharacter,
                         ..style.text_layout
+                    }
+                }
+                "text-xs" => {
+                    style.text_font = TextFont {
+                        font_size: 12.0,
+                        line_height: LineHeight::RelativeToFont(1.0 / 0.75),
+                        ..style.text_font
+                    }
+                }
+                "text-sm" => {
+                    style.text_font = TextFont {
+                        font_size: 14.0,
+                        line_height: LineHeight::RelativeToFont(1.25 / 0.875),
+                        ..style.text_font
+                    }
+                }
+                "text-base" => {
+                    style.text_font = TextFont {
+                        font_size: 16.0,
+                        line_height: LineHeight::RelativeToFont(1.5 / 1.0),
+                        ..style.text_font
+                    }
+                }
+                "text-lg" => {
+                    style.text_font = TextFont {
+                        font_size: 18.0,
+                        line_height: LineHeight::RelativeToFont(1.75 / 1.125),
+                        ..style.text_font
+                    }
+                }
+                "text-xl" => {
+                    style.text_font = TextFont {
+                        font_size: 20.0,
+                        line_height: LineHeight::RelativeToFont(1.75 / 1.25),
+                        ..style.text_font
+                    }
+                }
+                "text-2xl" => {
+                    style.text_font = TextFont {
+                        font_size: 24.0,
+                        line_height: LineHeight::RelativeToFont(2.0 / 1.5),
+                        ..style.text_font
+                    }
+                }
+                "text-3xl" => {
+                    style.text_font = TextFont {
+                        font_size: 30.0,
+                        line_height: LineHeight::RelativeToFont(2.25 / 1.875),
+                        ..style.text_font
+                    }
+                }
+                "text-4xl" => {
+                    style.text_font = TextFont {
+                        font_size: 36.0,
+                        line_height: LineHeight::RelativeToFont(2.5 / 2.25),
+                        ..style.text_font
+                    }
+                }
+                "text-5xl" => {
+                    style.text_font = TextFont {
+                        font_size: 48.0,
+                        line_height: LineHeight::RelativeToFont(1.0),
+                        ..style.text_font
+                    }
+                }
+                "text-6xl" => {
+                    style.text_font = TextFont {
+                        font_size: 60.0,
+                        line_height: LineHeight::RelativeToFont(1.0),
+                        ..style.text_font
+                    }
+                }
+                "text-7xl" => {
+                    style.text_font = TextFont {
+                        font_size: 72.0,
+                        line_height: LineHeight::RelativeToFont(1.0),
+                        ..style.text_font
+                    }
+                }
+                "text-8xl" => {
+                    style.text_font = TextFont {
+                        font_size: 96.0,
+                        line_height: LineHeight::RelativeToFont(1.0),
+                        ..style.text_font
+                    }
+                }
+                "text-9xl" => {
+                    style.text_font = TextFont {
+                        font_size: 128.0,
+                        line_height: LineHeight::RelativeToFont(1.0),
+                        ..style.text_font
                     }
                 }
 
@@ -901,6 +1013,29 @@ impl Style {
 
                         let span = captures.get(1).unwrap().as_str().parse::<u16>().unwrap();
                         style.grid_column = GridPlacement::span(span);
+                    } else if REGEX.custom_font.is_match(class) {
+                        let Some(captures) = REGEX.custom_font.captures(class) else {
+                            continue;
+                        };
+
+                        let font_name = captures.get(1).unwrap().as_str();
+                        style.text_font = TextFont {
+                            font: fonts
+                                .get(font_name)
+                                .expect(&format!("No font registered with name {font_name}"))
+                                .clone(),
+                            ..style.text_font
+                        };
+                    } else if REGEX.font_size.is_match(class) {
+                        let Some(captures) = REGEX.font_size.captures(class) else {
+                            continue;
+                        };
+
+                        let font_size = captures.get(1).unwrap().as_str().parse::<usize>().unwrap();
+                        style.text_font = TextFont {
+                            font_size: font_size as f32,
+                            ..style.text_font
+                        };
                     } else {
                         warn!("Unsupported style class: {class}");
                     }
@@ -950,6 +1085,7 @@ impl Style {
             self.text_color,
             self.z_index,
             self.text_layout,
+            self.text_font.clone(),
         )
     }
 }
