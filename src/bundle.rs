@@ -13,9 +13,15 @@ impl From<Handle<HtmlTailwind>> for HtmlTailwindHandle {
     }
 }
 
-#[derive(Component)]
-pub struct HtmlUiSpawned;
+/// Component that stores the HTML ID of a node
+#[derive(Component, Reflect, Debug, Clone, PartialEq, Eq, Hash)]
+pub struct HtmlId(pub String);
 
+/// Marker component that is attached when the node tree is spawned on the entity
+#[derive(Component)]
+pub struct HtmlTailwindSpawned;
+
+/// Bundle for HTML UI nodes with Tailwind CSS styling
 #[derive(Bundle)]
 pub struct HtmlTailwindBundle {
     pub ui: HtmlTailwindHandle,

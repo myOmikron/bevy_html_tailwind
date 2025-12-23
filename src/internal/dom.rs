@@ -1,6 +1,7 @@
 use bevy::asset::LoadContext;
 use bevy::prelude::*;
 
+use crate::bundle::HtmlId;
 use crate::internal::tailwind::Style;
 
 #[derive(Debug, Clone)]
@@ -78,6 +79,10 @@ impl XDiv {
 
     fn apply_to_entity(&self, commands: &mut EntityCommands) {
         commands.insert(self.style.to_node());
+        if let Some(id) = &self.id {
+            commands.insert(HtmlId(id.clone()));
+        }
+
         if let Some(content) = &self.content {
             commands.with_child(Text::new(content));
         }
@@ -133,6 +138,9 @@ impl XText {
 
     fn apply_to_entity(&self, commands: &mut EntityCommands) {
         commands.insert(self.style.to_node());
+        if let Some(id) = &self.id {
+            commands.insert(HtmlId(id.clone()));
+        }
 
         if let Some(content) = &self.content {
             commands.insert(Text::new(content));
@@ -193,6 +201,9 @@ impl XImg {
             image: self.image_handle.clone(),
             ..Default::default()
         });
+        if let Some(id) = &self.id {
+            commands.insert(HtmlId(id.clone()));
+        }
 
         commands.with_children(|parent| {
             for child in &self.children {
@@ -245,6 +256,10 @@ impl XButton {
 
     fn apply_to_entity(&self, commands: &mut EntityCommands) {
         commands.insert((Button, self.style.to_node()));
+
+        if let Some(id) = &self.id {
+            commands.insert(HtmlId(id.clone()));
+        }
 
         if let Some(content) = &self.content {
             commands.with_child(Text::new(content));
