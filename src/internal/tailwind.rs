@@ -97,9 +97,9 @@ pub static REGEX: LazyLock<TailwindRegex> = LazyLock::new(|| TailwindRegex {
         r"^grid-rows-(?:(\d+)|\[((?:\d+fr|\d+px|auto)(?:_\d+fr|_\d+px|_auto)*)])$",
     )
     .unwrap(),
-    gap: Regex::new(r"gap-\[(\d+px)]").unwrap(),
-    row_gap: Regex::new(r"gap-y-\[(\d+px)]").unwrap(),
-    column_gap: Regex::new(r"gap-x-\[(\d+px)]").unwrap(),
+    gap: Regex::new(r"gap-\[(\d+)px]").unwrap(),
+    row_gap: Regex::new(r"gap-y-\[(\d+)px]").unwrap(),
+    column_gap: Regex::new(r"gap-x-\[(\d+)px]").unwrap(),
 });
 
 #[derive(Debug, Clone, PartialEq)]
