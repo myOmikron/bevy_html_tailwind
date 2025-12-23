@@ -43,6 +43,9 @@ pub struct TailwindRegex {
     pub z_index: Regex,
     pub grid_template_columns: Regex,
     pub grid_template_rows: Regex,
+    pub row_gap: Regex,
+    pub column_gap: Regex,
+    pub gap: Regex,
 }
 
 pub static REGEX: LazyLock<TailwindRegex> = LazyLock::new(|| TailwindRegex {
@@ -94,6 +97,9 @@ pub static REGEX: LazyLock<TailwindRegex> = LazyLock::new(|| TailwindRegex {
         r"^grid-rows-(?:(\d+)|\[((?:\d+fr|\d+px|auto)(?:_\d+fr|_\d+px|_auto)*)])$",
     )
     .unwrap(),
+    gap: Regex::new(r"gap-\[(\d+px)]").unwrap(),
+    row_gap: Regex::new(r"gap-y-\[(\d+px)]").unwrap(),
+    column_gap: Regex::new(r"gap-x-\[(\d+px)]").unwrap(),
 });
 
 #[derive(Debug, Clone, PartialEq)]
@@ -123,6 +129,8 @@ pub struct Style {
     pub z_index: ZIndex,
     pub grid_template_columns: Vec<RepeatedGridTrack>,
     pub grid_template_rows: Vec<RepeatedGridTrack>,
+    pub row_gap: Val,
+    pub column_gap: Val,
 }
 
 impl Default for Style {
@@ -153,6 +161,8 @@ impl Default for Style {
             z_index: ZIndex::default(),
             grid_template_columns: vec![],
             grid_template_rows: vec![],
+            row_gap: auto(),
+            column_gap: auto(),
         }
     }
 }
@@ -728,6 +738,32 @@ impl Style {
                             }
                         }
                         style.grid_template_rows = rows;
+                    } else if REGEX.row_gap.is_match(class) {
+                        let Some(captures) = REGEX.row_gap.captures(class) else {
+                            continue;
+                        };
+
+                        let row_gap = captures.get(1).unwrap().as_str().parse::<usize>().unwrap();
+
+                        style.row_gap = px(row_gap);
+                    } else if REGEX.column_gap.is_match(class) {
+                        let Some(captures) = REGEX.column_gap.captures(class) else {
+                            continue;
+                        };
+
+                        let column_gap =
+                            captures.get(1).unwrap().as_str().parse::<usize>().unwrap();
+
+                        style.column_gap = px(column_gap);
+                    } else if REGEX.gap.is_match(class) {
+                        let Some(captures) = REGEX.gap.captures(class) else {
+                            continue;
+                        };
+
+                        let gap = captures.get(1).unwrap().as_str().parse::<usize>().unwrap();
+
+                        style.column_gap = px(gap);
+                        style.row_gap = px(gap);
                     } else {
                         warn!("Unsupported style class: {class}");
                     }
@@ -761,6 +797,8 @@ impl Style {
                 margin: self.margin,
                 grid_template_columns: self.grid_template_columns.clone(),
                 grid_template_rows: self.grid_template_rows.clone(),
+                row_gap: self.row_gap,
+                column_gap: self.column_gap,
                 ..Default::default()
             },
             self.visibility,
