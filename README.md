@@ -1,5 +1,12 @@
 # bevy_html_tailwind
 
+## Features
+
+- [x] Hot-reloading
+- [x] Loading images
+- [x] Using HTML id as a marker component
+- [ ] Custom fonts
+
 ## Setup
 
 ```rust
