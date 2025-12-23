@@ -34,7 +34,7 @@ Loading images is supported by the `bevy_html_tailwind` crate. You can load imag
 tag and specifying the image path relative to your assets' directory. For example:
 
 ```html
-<img src="images/example.png">
+<img src="images/example.png"/>
 ```
 
 ## Compatibility with bevy
