@@ -49,6 +49,8 @@ pub struct TailwindRegex {
     pub right: Regex,
     pub top: Regex,
     pub bottom: Regex,
+    pub col_span: Regex,
+    pub row_span: Regex,
 }
 
 pub static REGEX: LazyLock<TailwindRegex> = LazyLock::new(|| TailwindRegex {
@@ -107,6 +109,8 @@ pub static REGEX: LazyLock<TailwindRegex> = LazyLock::new(|| TailwindRegex {
     right: Regex::new(r"^(-)?right-\[(\d+)px]$").unwrap(),
     top: Regex::new(r"^(-)?top-\[(\d+)px]$").unwrap(),
     bottom: Regex::new(r"^(-)?bottom-\[(\d+)px]$").unwrap(),
+    col_span: Regex::new(r"^col-span-(\d+)$").unwrap(),
+    row_span: Regex::new(r"^row-span-(\d+)$").unwrap(),
 });
 
 #[derive(Debug, Clone, PartialEq)]
@@ -142,6 +146,8 @@ pub struct Style {
     pub bottom: Val,
     pub left: Val,
     pub right: Val,
+    pub grid_column: GridPlacement,
+    pub grid_row: GridPlacement,
 }
 
 impl Default for Style {
@@ -178,6 +184,8 @@ impl Default for Style {
             top: auto(),
             bottom: auto(),
             left: auto(),
+            grid_column: GridPlacement::default(),
+            grid_row: GridPlacement::default(),
         }
     }
 }
@@ -831,6 +839,20 @@ impl Style {
                         } else {
                             px(distance)
                         };
+                    } else if REGEX.col_span.is_match(class) {
+                        let Some(captures) = REGEX.col_span.captures(class) else {
+                            continue;
+                        };
+
+                        let span = captures.get(1).unwrap().as_str().parse::<u16>().unwrap();
+                        style.grid_column = GridPlacement::span(span);
+                    } else if REGEX.row_span.is_match(class) {
+                        let Some(captures) = REGEX.row_span.captures(class) else {
+                            continue;
+                        };
+
+                        let span = captures.get(1).unwrap().as_str().parse::<u16>().unwrap();
+                        style.grid_column = GridPlacement::span(span);
                     } else {
                         warn!("Unsupported style class: {class}");
                     }
@@ -866,6 +888,8 @@ impl Style {
                 grid_template_rows: self.grid_template_rows.clone(),
                 row_gap: self.row_gap,
                 column_gap: self.column_gap,
+                grid_column: self.grid_column,
+                grid_row: self.grid_row,
                 ..Default::default()
             },
             self.visibility,
