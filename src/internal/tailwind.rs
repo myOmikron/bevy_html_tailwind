@@ -70,12 +70,12 @@ pub struct TailwindRegex {
 }
 
 pub static REGEX: LazyLock<TailwindRegex> = LazyLock::new(|| TailwindRegex {
-    width: Regex::new(r"^w-\[(\d+)px]$").unwrap(),
-    min_width: Regex::new(r"^min-w-\[(\d+)px]$").unwrap(),
-    max_width: Regex::new(r"^max-w-\[(\d+)px]$").unwrap(),
-    height: Regex::new(r"^h-\[(\d+)px]$").unwrap(),
-    min_height: Regex::new(r"^min-h-\[(\d+)px]$").unwrap(),
-    max_height: Regex::new(r"^max-h-\[(\d+)px]$").unwrap(),
+    width: Regex::new(r"^w-\[(\d+)px|(\d+)%]$").unwrap(),
+    min_width: Regex::new(r"^min-w-\[(\d+)px|(\d+)%]$").unwrap(),
+    max_width: Regex::new(r"^max-w-\[(\d+)px|(\d+)%]$").unwrap(),
+    height: Regex::new(r"^h-\[(\d+)px|(\d+)%]$").unwrap(),
+    min_height: Regex::new(r"^min-h-\[(\d+)px|(\d+)%]$").unwrap(),
+    max_height: Regex::new(r"^max-h-\[(\d+)px|(\d+)%]$").unwrap(),
     border: Regex::new(r"^border-(\d+)$").unwrap(),
     border_x: Regex::new(r"^border-x-(\d+)$").unwrap(),
     border_y: Regex::new(r"^border-y-(\d+)$").unwrap(),
@@ -682,38 +682,97 @@ impl Style {
                         let Some(captures) = REGEX.width.captures(class) else {
                             continue;
                         };
-                        let px_val = captures.get(1).unwrap().as_str().parse::<u64>().unwrap();
-                        style.width = px(px_val);
+                        if let Some(px_val) =
+                            captures.get(1).map(|x| x.as_str().parse::<u64>().unwrap())
+                        {
+                            style.width = px(px_val);
+                        }
+
+                        if let Some(percent_val) =
+                            captures.get(2).map(|x| x.as_str().parse::<u64>().unwrap())
+                        {
+                            style.width = percent(percent_val);
+                        }
                     } else if REGEX.min_width.is_match(class) {
                         let Some(captures) = REGEX.min_width.captures(class) else {
                             continue;
                         };
-                        let px_val = captures.get(1).unwrap().as_str().parse::<u64>().unwrap();
-                        style.min_width = px(px_val);
+
+                        if let Some(px_val) =
+                            captures.get(1).map(|x| x.as_str().parse::<u64>().unwrap())
+                        {
+                            style.min_width = px(px_val);
+                        }
+
+                        if let Some(percent_val) =
+                            captures.get(2).map(|x| x.as_str().parse::<u64>().unwrap())
+                        {
+                            style.min_width = percent(percent_val);
+                        }
                     } else if REGEX.max_width.is_match(class) {
                         let Some(captures) = REGEX.max_width.captures(class) else {
                             continue;
                         };
-                        let px_val = captures.get(1).unwrap().as_str().parse::<u64>().unwrap();
-                        style.max_width = px(px_val);
+
+                        if let Some(px_val) =
+                            captures.get(1).map(|x| x.as_str().parse::<u64>().unwrap())
+                        {
+                            style.max_width = px(px_val);
+                        }
+
+                        if let Some(percent_val) =
+                            captures.get(2).map(|x| x.as_str().parse::<u64>().unwrap())
+                        {
+                            style.max_width = percent(percent_val);
+                        }
                     } else if REGEX.height.is_match(class) {
                         let Some(captures) = REGEX.height.captures(class) else {
                             continue;
                         };
-                        let px_val = captures.get(1).unwrap().as_str().parse::<u64>().unwrap();
-                        style.height = px(px_val);
+
+                        if let Some(px_val) =
+                            captures.get(1).map(|x| x.as_str().parse::<u64>().unwrap())
+                        {
+                            style.height = px(px_val);
+                        }
+
+                        if let Some(percent_val) =
+                            captures.get(2).map(|x| x.as_str().parse::<u64>().unwrap())
+                        {
+                            style.height = percent(percent_val);
+                        }
                     } else if REGEX.min_height.is_match(class) {
                         let Some(captures) = REGEX.min_height.captures(class) else {
                             continue;
                         };
-                        let px_val = captures.get(1).unwrap().as_str().parse::<u64>().unwrap();
-                        style.min_height = px(px_val);
+
+                        if let Some(px_val) =
+                            captures.get(1).map(|x| x.as_str().parse::<u64>().unwrap())
+                        {
+                            style.min_height = px(px_val);
+                        }
+
+                        if let Some(percent_val) =
+                            captures.get(2).map(|x| x.as_str().parse::<u64>().unwrap())
+                        {
+                            style.min_height = percent(percent_val);
+                        }
                     } else if REGEX.max_height.is_match(class) {
                         let Some(captures) = REGEX.max_height.captures(class) else {
                             continue;
                         };
-                        let px_val = captures.get(1).unwrap().as_str().parse::<u64>().unwrap();
-                        style.max_height = px(px_val);
+
+                        if let Some(px_val) =
+                            captures.get(1).map(|x| x.as_str().parse::<u64>().unwrap())
+                        {
+                            style.max_height = px(px_val);
+                        }
+
+                        if let Some(percent_val) =
+                            captures.get(2).map(|x| x.as_str().parse::<u64>().unwrap())
+                        {
+                            style.max_height = percent(percent_val);
+                        }
                     } else if REGEX.border.is_match(class) {
                         let Some(captures) = REGEX.border.captures(class) else {
                             continue;
