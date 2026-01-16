@@ -1,6 +1,6 @@
 [package]
 name = "bevy_html_tailwind"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 license = "MPL-2.0"
 authors = ["Niklas Pfister <git@omikron.dev>"]
@@ -30,10 +30,10 @@ regex = { version = "~1" }
 log = { version = "~0.4" }
 
 [dependencies.bevy]
-version = "~0.17"
+version = "~0.18"
 default-features = false
 features = ["bevy_asset", "bevy_ui"]
 
 [dev-dependencies]
-bevy = { version = "~0.17", features = ["file_watcher"] }
-bevy-inspector-egui = { version = "~0.35" }
+bevy = { version = "~0.18", features = ["file_watcher"] }
+bevy-inspector-egui = { version = "~0.36" }

@@ -3,17 +3,12 @@ use std::sync::LazyLock;
 use bevy::asset::Handle;
 use bevy::color::Color;
 use bevy::platform::collections::HashMap;
-use bevy::prelude::Bundle;
-use bevy::prelude::Font;
-use bevy::prelude::Justify;
-use bevy::prelude::TextLayout;
-use bevy::prelude::Visibility;
+use bevy::prelude::*;
 use bevy::text::FontSmoothing;
 use bevy::text::LineBreak;
 use bevy::text::LineHeight;
 use bevy::text::TextColor;
 use bevy::text::TextFont;
-use bevy::ui::*;
 use log::warn;
 use regex::Regex;
 
@@ -136,6 +131,19 @@ pub static REGEX: LazyLock<TailwindRegex> = LazyLock::new(|| TailwindRegex {
     border_radius_tr: Regex::new(r"^border-tr-\[(\d+)px]$").unwrap(),
 });
 
+#[derive(Debug, Bundle, Reflect)]
+pub struct TailwindNodeBundle {
+    pub node: Node,
+    pub visibility: Visibility,
+    pub border_color: BorderColor,
+    pub background_color: BackgroundColor,
+    pub text_color: TextColor,
+    pub z_index: ZIndex,
+    pub text_layout: TextLayout,
+    pub text_font: TextFont,
+    pub line_height: LineHeight,
+}
+
 #[derive(Debug, Clone)]
 pub struct Style {
     pub visibility: Visibility,
@@ -172,6 +180,7 @@ pub struct Style {
     pub grid_column: GridPlacement,
     pub grid_row: GridPlacement,
     pub text_layout: TextLayout,
+    pub line_height: LineHeight,
     pub text_font: TextFont,
     pub border_radius: BorderRadius,
 }
@@ -213,6 +222,7 @@ impl Default for Style {
             grid_column: GridPlacement::default(),
             grid_row: GridPlacement::default(),
             text_layout: TextLayout::default(),
+            line_height: LineHeight::default(),
             text_font: TextFont::default(),
             border_radius: BorderRadius::default(),
         }
@@ -502,93 +512,93 @@ impl Style {
                 "text-xs" => {
                     style.text_font = TextFont {
                         font_size: 12.0,
-                        line_height: LineHeight::RelativeToFont(1.0 / 0.75),
                         ..style.text_font
-                    }
+                    };
+                    style.line_height = LineHeight::RelativeToFont(1.0 / 0.75);
                 }
                 "text-sm" => {
                     style.text_font = TextFont {
                         font_size: 14.0,
-                        line_height: LineHeight::RelativeToFont(1.25 / 0.875),
                         ..style.text_font
-                    }
+                    };
+                    style.line_height = LineHeight::RelativeToFont(1.25 / 0.875);
                 }
                 "text-base" => {
                     style.text_font = TextFont {
                         font_size: 16.0,
-                        line_height: LineHeight::RelativeToFont(1.5 / 1.0),
                         ..style.text_font
-                    }
+                    };
+                    style.line_height = LineHeight::RelativeToFont(1.5 / 1.0);
                 }
                 "text-lg" => {
                     style.text_font = TextFont {
                         font_size: 18.0,
-                        line_height: LineHeight::RelativeToFont(1.75 / 1.125),
                         ..style.text_font
-                    }
+                    };
+                    style.line_height = LineHeight::RelativeToFont(1.75 / 1.125);
                 }
                 "text-xl" => {
                     style.text_font = TextFont {
                         font_size: 20.0,
-                        line_height: LineHeight::RelativeToFont(1.75 / 1.25),
                         ..style.text_font
-                    }
+                    };
+                    style.line_height = LineHeight::RelativeToFont(1.75 / 1.25);
                 }
                 "text-2xl" => {
                     style.text_font = TextFont {
                         font_size: 24.0,
-                        line_height: LineHeight::RelativeToFont(2.0 / 1.5),
                         ..style.text_font
-                    }
+                    };
+                    style.line_height = LineHeight::RelativeToFont(2.0 / 1.5);
                 }
                 "text-3xl" => {
                     style.text_font = TextFont {
                         font_size: 30.0,
-                        line_height: LineHeight::RelativeToFont(2.25 / 1.875),
                         ..style.text_font
-                    }
+                    };
+                    style.line_height = LineHeight::RelativeToFont(2.25 / 1.875);
                 }
                 "text-4xl" => {
                     style.text_font = TextFont {
                         font_size: 36.0,
-                        line_height: LineHeight::RelativeToFont(2.5 / 2.25),
                         ..style.text_font
-                    }
+                    };
+                    style.line_height = LineHeight::RelativeToFont(2.5 / 2.25);
                 }
                 "text-5xl" => {
                     style.text_font = TextFont {
                         font_size: 48.0,
-                        line_height: LineHeight::RelativeToFont(1.0),
                         ..style.text_font
-                    }
+                    };
+                    style.line_height = LineHeight::RelativeToFont(1.0);
                 }
                 "text-6xl" => {
                     style.text_font = TextFont {
                         font_size: 60.0,
-                        line_height: LineHeight::RelativeToFont(1.0),
                         ..style.text_font
-                    }
+                    };
+                    style.line_height = LineHeight::RelativeToFont(1.0);
                 }
                 "text-7xl" => {
                     style.text_font = TextFont {
                         font_size: 72.0,
-                        line_height: LineHeight::RelativeToFont(1.0),
                         ..style.text_font
-                    }
+                    };
+                    style.line_height = LineHeight::RelativeToFont(1.0);
                 }
                 "text-8xl" => {
                     style.text_font = TextFont {
                         font_size: 96.0,
-                        line_height: LineHeight::RelativeToFont(1.0),
                         ..style.text_font
-                    }
+                    };
+                    style.line_height = LineHeight::RelativeToFont(1.0);
                 }
                 "text-9xl" => {
                     style.text_font = TextFont {
                         font_size: 128.0,
-                        line_height: LineHeight::RelativeToFont(1.0),
                         ..style.text_font
-                    }
+                    };
+                    style.line_height = LineHeight::RelativeToFont(1.0);
                 }
 
                 "rounded-xs" => style.border_radius = BorderRadius::all(px(2)),
@@ -1246,9 +1256,9 @@ impl Style {
         style
     }
 
-    pub fn to_node(&self) -> impl Bundle {
-        (
-            Node {
+    pub fn to_node(&self) -> TailwindNodeBundle {
+        TailwindNodeBundle {
+            node: Node {
                 position_type: self.position,
                 display: self.display,
                 flex_direction: self.flex_direction,
@@ -1265,6 +1275,7 @@ impl Style {
                 min_height: self.min_height,
                 max_height: self.max_height,
                 border: self.border,
+                border_radius: self.border_radius,
                 padding: self.padding,
                 margin: self.margin,
                 grid_template_columns: self.grid_template_columns.clone(),
@@ -1279,14 +1290,14 @@ impl Style {
                 right: self.right,
                 ..Default::default()
             },
-            self.visibility,
-            self.border_color,
-            self.background_color,
-            self.text_color,
-            self.z_index,
-            self.text_layout,
-            self.text_font.clone(),
-            self.border_radius,
-        )
+            visibility: self.visibility,
+            border_color: self.border_color,
+            background_color: self.background_color,
+            text_color: self.text_color,
+            z_index: self.z_index,
+            text_layout: self.text_layout,
+            text_font: self.text_font.clone(),
+            line_height: self.line_height,
+        }
     }
 }

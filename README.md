@@ -12,6 +12,8 @@
 - [x] Loading images
 - [x] Using HTML id as a marker component
 - [x] Custom fonts
+- [ ] Rewrite parser code
+- [ ] Support percentage values everywhere
 
 ## Setup
 
@@ -101,6 +103,7 @@ The first decendent of the `<body>` section will be used as your root node displ
 | Bevy Version | bevy_html_tailwind |
 |--------------|--------------------|
 | 0.17         | 0.1                |
+| 0.18         | 0.2                |
 
 ## Contributing
 

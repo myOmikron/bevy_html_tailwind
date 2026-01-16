@@ -18,7 +18,7 @@ pub struct HtmlTailwind {
     pub default_font: Option<Handle<Font>>,
 }
 
-#[derive(Default)]
+#[derive(Default, TypePath)]
 pub struct HtmlUiAssetLoader;
 
 impl AssetLoader for HtmlUiAssetLoader {
