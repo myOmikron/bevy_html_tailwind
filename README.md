@@ -3,7 +3,7 @@
 [![Crates.io License](https://img.shields.io/crates/l/bevy_html_tailwind)](https://github.com/myOmikron/bevy_html_tailwind/blob/main/LICENSE)
 [![Crates.io Version](https://img.shields.io/crates/v/bevy_html_tailwind)](https://crates.io/crates/bevy_html_tailwind)
 [![crates io downloads](https://img.shields.io/crates/d/bevy_html_tailwind)](https://crates.io/crates/bevy_html_tailwind)
-[![docs.rs](https://img.shields.io/docsrs/bevy_html_tailwind)](https://docs.rs/ikebuster/latest/bevy_html_tailwind/)
+[![docs.rs](https://img.shields.io/docsrs/bevy_html_tailwind)](https://docs.rs/bevy_html_tailwind/latest/bevy_html_tailwind/)
 [![ci](https://img.shields.io/github/actions/workflow/status/myOmikron/bevy_html_tailwind/ci.yml?label=CI)](https://github.com/myOmikron/bevy_html_tailwind/actions/workflows/ci.yml)
 
 ## Features
